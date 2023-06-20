@@ -22,6 +22,7 @@ public class Point implements WritableComparable<Centroid> {
     for (int i = 0; i < n; i++) {
       this.coordinates.add(new DoubleWritable(0.0));
     }
+
   }
 
   // Declare a new list and the we add to the list every coordinates
