@@ -53,7 +53,7 @@ public class Kmeans {
     long start = System.currentTimeMillis();
 
     //without randomly centroids comment from 57 to 75, 85, from 178 to 182
-    
+
     Job centroidsJob = Job.getInstance(conf, "RandomCentroid JAVA");
 
     centroidsJob.setJarByClass(Kmeans.class);
@@ -63,7 +63,7 @@ public class Kmeans {
     centroidsJob.setMapOutputValueClass(Text.class);
     centroidsJob.setOutputKeyClass(Text.class);
     centroidsJob.setOutputValueClass(Text.class);
-    
+
     FileInputFormat.addInputPath(centroidsJob, new Path(otherArgs[0]));
     FileOutputFormat.setOutputPath(centroidsJob, new Path(otherArgs[5]));
 
@@ -75,8 +75,8 @@ public class Kmeans {
     centroidsJob.getConfiguration().set("centroidsFilename", otherArgs[4]);
 
     Path output = new Path(otherArgs[5]);
-    FileSystem fs = FileSystem.get(output.toUri(),conf);
-    
+    FileSystem fs = FileSystem.get(output.toUri(), conf);
+
     if (fs.exists(output)) {
       System.out.println("Delete old output folder: " + output.toString());
       fs.delete(output, true);
@@ -84,23 +84,24 @@ public class Kmeans {
 
     centroidsJob.waitForCompletion(true);
 
-    // Path centroidsOutput = new Path(otherArgs[4]);
-    // FileSystem fs = FileSystem.get(output.toUri(),conf);
-    
-    // if (fs.exists(centroidsOutput)) {
-    //   System.out.println("Delete old output folder: " + output.toString());
-    //   fs.delete(centroidsOutput, true);
-    // }
+//     Path centroidsOutput = new Path(otherArgs[4]);
+//     FileSystem fs = FileSystem.get(output.toUri(),conf);
+
+//     if (fs.exists(centroidsOutput)) {
+//       System.out.println("Delete old output folder: " + output.toString());
+//       fs.delete(centroidsOutput, true);
+//     }
 
     //createCentroids(conf, new Path(otherArgs[4]), Integer.parseInt(otherArgs[2]));
 
     System.out.println("=======================");
     System.out.println("FIRST CENTROIDS");
     System.out.println("=======================");
+
     readCentroids(conf, new Path(otherArgs[4]));
 
     long convergedCentroids = 0;
-    
+
     int k = Integer.parseInt(args[1]);
     long iterations = 0;
 
@@ -109,7 +110,7 @@ public class Kmeans {
       System.out.println("    ITERATION:    " + (iterations + 1));
       System.out.println("    CONVERGED CENTROIDS:    " + convergedCentroids);
       System.out.println("=======================");
-      
+
       if (fs.exists(output)) {
         System.out.println("=======================");
         System.out.println("DELETE OLD OUTPUT FOLDER: " + output.toString());
@@ -118,7 +119,7 @@ public class Kmeans {
       }
 
       Job job = Job.getInstance(conf, "Kmean JAVA " + (iterations + 1));
-      
+
       job.getConfiguration().set("k", otherArgs[1]);
       job.getConfiguration().set("dimension", otherArgs[2]);
       job.getConfiguration().set("threshold", otherArgs[3]);
@@ -139,16 +140,16 @@ public class Kmeans {
       FileOutputFormat.setOutputPath(job, new Path(otherArgs[5]));
 
       job.waitForCompletion(true);
-      
+
       convergedCentroids = job.getCounters().findCounter(KMeansReducer.Counter.CONVERGED_COUNT).getValue();
       iterations++;
     }
-    
+
     long end = System.currentTimeMillis();
     long elapsedTime = end - start;
     long minutes = (elapsedTime / 1000) / 60;
     long seconds = (elapsedTime / 1000) % 60;
-    
+
     System.out.println("=======================");
     System.out.println(" TOTAL TIME " + minutes + " m " + seconds + "s");
     System.out.println("=======================");
@@ -158,11 +159,64 @@ public class Kmeans {
     System.out.println("=======================");
     System.out.println("::NUMBER OF CONVERGED COUNT:: " + convergedCentroids);
     System.out.println("=======================");
-    
-    
+
+
     readCentroids(conf, new Path(otherArgs[4]));
   }
 
+  public static Point[]
+  readRandomCentroids(int K, int DIM, String INPUT_FILE, Configuration conf) throws IOException
+  {
+    Point[] toReturn = new Point[K];
+    Random random = new Random();
+
+    List<Integer> uniqueNumbers = new ArrayList<Integer>();
+
+    int pick;
+
+    // FRA: Assegnare a dataSetSize il numero di righe del file INPUT_FILE
+    int dataSetSize = -1; //getDatasetSize(conf, INPUT_FILE);
+
+    while(uniqueNumbers.size() < K) {
+      // Siccome prendo un CSV, la linea del nome delle colonne va scartata
+      pick = random.nextInt(dataSetSize - 1) + 1;
+      // Pick sara un numero da 1 a n-1 dove n e' il numero delle righe del file CSV
+      if(!uniqueNumbers.contains(pick)) {
+        uniqueNumbers.add(pick);
+      }
+    }
+
+    Path path = new Path(INPUT_FILE);
+    FileSystem hdfs = FileSystem.get(conf);
+
+    // Skippo la prima riga che contiene il nome delle features
+    int currentLine = 1;
+    String line;
+
+    int i = 0;
+    //Bisogna leggere dal file INPUT_FILE i punti eletti come centroidi
+    /*
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(hdfs.open(path))))
+    {
+      // Finche una linea esiste vado avanti
+      while((line = reader.readLine()) != null) {
+
+        // Se la linea corrente e' nel vettore random, lo prendo
+        if (uniqueNumbers.contains(currentLine)) {
+
+          toReturn[i] = new Point(line);
+          i++;
+
+          if(i == K) return toReturn;
+        }
+
+        currentLine++;
+      }
+      */
+    }
+
+    return toReturn;
+  }
 
   private static void createCentroids(Configuration conf, Path centroids, int dimension) throws IOException {
     SequenceFile.Writer centroidWriter = SequenceFile.createWriter(conf,
@@ -173,31 +227,30 @@ public class Kmeans {
     List<DoubleWritable> listParameters = new ArrayList<DoubleWritable>();
     Centroid auxiliarCentroid;
 
-    
-    
+
     double[][] arrays = {
-      {0.297959,0.469496,0.211699,0.077399,0.256267,0.08078,0.169916,0.0625,0.670639},
-      {0.297959,0.469496,0.220056,0.074303,0.247911,0.072423,0.172702,0.0625,0.703142},
-      {0.297959,0.469496,0.239554,0.06192,0.256267,0.064067,0.208914,0.05625,0.698808},
+            {0.297959, 0.469496, 0.211699, 0.077399, 0.256267, 0.08078, 0.169916, 0.0625, 0.670639},
+            {0.297959, 0.469496, 0.220056, 0.074303, 0.247911, 0.072423, 0.172702, 0.0625, 0.703142},
+            {0.297959, 0.469496, 0.239554, 0.06192, 0.256267, 0.064067, 0.208914, 0.05625, 0.698808},
     };
-   
-      //d = 3 k = 7
-      //double[][] arrays = {{0.297959,0.474801,0.448468}, {0.297959,0.480106,0.214485}, {0.297959,0.482759,0.247911}, {0.297959,0.482759,0.51532}, {0.297959,0.469496,0.211699}, {0.297959,0.458886,0.220056}, {0.297959,0.453581,0.239554}};
-      //d = 3 k = 13
-      //double[][] arrays = {{0.297959,0.474801,0.448468}, {0.297959,0.480106,0.214485}, {0.297959,0.482759,0.247911}, {0.297959,0.482759,0.51532}, {0.297959,0.469496,0.211699}, {0.297959,0.458886,0.220056}, {0.297959,0.453581,0.239554},{0.297959,0.450928,0.292479}, {0.297959,0.450928,0.259053}, {0.297959,0.450928,0.401114}, {0.293878,0.464191,0.292479}, {0.293878,0.477454,0.32312}, {0.293878,0.482759,0.395543}};
-      //d = 7 k = 7
-      //double[][] arrays = {{0.297959,0.474801,0.448468,0.024768,0.598886,0.038997,0.119777}, {0.297959,0.480106,0.214485,0.021672,0.398329,0.030641,0.902507}, {0.297959,0.482759,0.247911, 0.037152,0.311978,0.041783,0.033426}, {0.297959,0.482759,0.51532,0.012384,0.724234,0.02507,0.278552}, {0.297959,0.469496,0.211699,0.077399,0.256267,0.08078,0.169916}, {0.297959,0.458886,0.220056,0.074303,0.247911,0.072423,0.172702}, {0.297959,0.453581,0.239554,0.06192,0.256267,0.064067,0.208914}};
-      //d = 7 k = 13
-     // double[][] arrays = {{0.297959,0.474801,0.448468,0.024768,0.598886,0.038997,0.119777}, {0.297959,0.480106,0.214485,0.021672,0.398329,0.030641,0.902507}, {0.297959,0.482759,0.247911,0.037152,0.311978,0.041783,0.033426}, {0.297959,0.482759,0.51532,0.012384,0.724234,0.02507,0.278552}, {0.297959,0.469496,0.211699,0.077399,0.256267,0.08078,0.169916}, {0.297959,0.458886,0.220056,0.074303,0.247911,0.072423,0.172702}, {0.297959,0.453581,0.239554,0.06192,0.256267,0.064067,0.208914},{0.297959,0.450928,0.292479,0.043344,0.348189,0.050139,0.228412}, {0.297959,0.450928,0.259053,0.012384,0.350975,0.016713,0.038997}, {0.297959,0.450928,0.401114,0.037152,0.465181,0.047354,0.320334}, {0.293878,0.464191,0.292479,0.049536,0.350975,0.052925,0.256267}, {0.293878,0.477454,0.32312,0.055728,0.398329,0.072423,0.289694}, {0.293878,0.482759,0.395543,0.034056,0.557103,0.050139,0.259053}};
+
+    //d = 3 k = 7
+    //double[][] arrays = {{0.297959,0.474801,0.448468}, {0.297959,0.480106,0.214485}, {0.297959,0.482759,0.247911}, {0.297959,0.482759,0.51532}, {0.297959,0.469496,0.211699}, {0.297959,0.458886,0.220056}, {0.297959,0.453581,0.239554}};
+    //d = 3 k = 13
+    //double[][] arrays = {{0.297959,0.474801,0.448468}, {0.297959,0.480106,0.214485}, {0.297959,0.482759,0.247911}, {0.297959,0.482759,0.51532}, {0.297959,0.469496,0.211699}, {0.297959,0.458886,0.220056}, {0.297959,0.453581,0.239554},{0.297959,0.450928,0.292479}, {0.297959,0.450928,0.259053}, {0.297959,0.450928,0.401114}, {0.293878,0.464191,0.292479}, {0.293878,0.477454,0.32312}, {0.293878,0.482759,0.395543}};
+    //d = 7 k = 7
+    //double[][] arrays = {{0.297959,0.474801,0.448468,0.024768,0.598886,0.038997,0.119777}, {0.297959,0.480106,0.214485,0.021672,0.398329,0.030641,0.902507}, {0.297959,0.482759,0.247911, 0.037152,0.311978,0.041783,0.033426}, {0.297959,0.482759,0.51532,0.012384,0.724234,0.02507,0.278552}, {0.297959,0.469496,0.211699,0.077399,0.256267,0.08078,0.169916}, {0.297959,0.458886,0.220056,0.074303,0.247911,0.072423,0.172702}, {0.297959,0.453581,0.239554,0.06192,0.256267,0.064067,0.208914}};
+    //d = 7 k = 13
+    // double[][] arrays = {{0.297959,0.474801,0.448468,0.024768,0.598886,0.038997,0.119777}, {0.297959,0.480106,0.214485,0.021672,0.398329,0.030641,0.902507}, {0.297959,0.482759,0.247911,0.037152,0.311978,0.041783,0.033426}, {0.297959,0.482759,0.51532,0.012384,0.724234,0.02507,0.278552}, {0.297959,0.469496,0.211699,0.077399,0.256267,0.08078,0.169916}, {0.297959,0.458886,0.220056,0.074303,0.247911,0.072423,0.172702}, {0.297959,0.453581,0.239554,0.06192,0.256267,0.064067,0.208914},{0.297959,0.450928,0.292479,0.043344,0.348189,0.050139,0.228412}, {0.297959,0.450928,0.259053,0.012384,0.350975,0.016713,0.038997}, {0.297959,0.450928,0.401114,0.037152,0.465181,0.047354,0.320334}, {0.293878,0.464191,0.292479,0.049536,0.350975,0.052925,0.256267}, {0.293878,0.477454,0.32312,0.055728,0.398329,0.072423,0.289694}, {0.293878,0.482759,0.395543,0.034056,0.557103,0.050139,0.259053}};
 
     for (int i = 0; i < arrays.length; i++) {
-        for (int j = 0; j < dimension; j++) {
-          listParameters.add(new DoubleWritable(arrays[i][j]));
-        }
+      for (int j = 0; j < dimension; j++) {
+        listParameters.add(new DoubleWritable(arrays[i][j]));
+      }
 
-        auxiliarCentroid = new Centroid(new IntWritable(i), listParameters);
-        centroidWriter.append(new IntWritable(i), auxiliarCentroid);
-        listParameters = new ArrayList<DoubleWritable>();
+      auxiliarCentroid = new Centroid(new IntWritable(i), listParameters);
+      centroidWriter.append(new IntWritable(i), auxiliarCentroid);
+      listParameters = new ArrayList<DoubleWritable>();
     }
 
     centroidWriter.close();
@@ -205,14 +258,14 @@ public class Kmeans {
 
   private static void readCentroids(Configuration conf, Path centroids) throws IOException {
     SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centroids));
-        IntWritable key = new IntWritable();
-        Centroid value = new Centroid();
+    IntWritable key = new IntWritable();
+    Centroid value = new Centroid();
 
-        while (reader.next(key, value)) {
-          System.out.println(value);
-        }
+    while (reader.next(key, value)) {
+      System.out.println(value);
+    }
 
-        reader.close();
+    reader.close();
   }
 }
 
