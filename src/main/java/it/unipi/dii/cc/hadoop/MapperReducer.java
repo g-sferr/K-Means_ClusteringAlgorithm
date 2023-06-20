@@ -2,12 +2,22 @@ package it.unipi.dii.cc.hadoop;
 
 import java.io.IOException;
 
+import java.util.StringTokenizer;
+
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+
+/****************************************************************************************/
+/****************************************************************************************/
+
+/* ---- Modificare implementazione coordinate punti da stringhe a lista di double ---- */
+
+/****************************************************************************************/
+/****************************************************************************************/
 
 public class MapperReducer
 {
@@ -46,8 +56,25 @@ public class MapperReducer
             // Contenente il nome delle features (che quindi non sono double)
             // Come conseguenza la riga attuale viene skippata senza compromettere il resto dell'esecuzione
 
+            Text word = new Text();
+
+            StringTokenizer itr = new StringTokenizer(value.toString(), ",");
+            // DIM = 3
+            // 1.1, 1.2, 1.3, 2.2, 2.2
+            //List<DoubleWritable> pointsList = new ArrayList<DoubleWritable>();
+            int count = 0;
+
+            String pointToCast = "";
+            while (itr.hasMoreTokens() && count < DIM)
+
+            {
+                word.set(itr.nextToken());
+                pointToCast += word.toString() + (count < (DIM-1) ? "," : ""); // 1.1,1.2,1.3
+                count++;
+            }
+
             try{
-                Point point = new Point(value.toString());
+                Point point = new Point(pointToCast);
                 // Calcolo la distanza tra ogni punto e i centroidi per trovare quello piu vicino al punto sotto esame
                 int index = 0;
                 double minDistance = Double.MAX_VALUE;
