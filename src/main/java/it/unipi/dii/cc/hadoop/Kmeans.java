@@ -256,16 +256,96 @@ public class Kmeans {
     centroidWriter.close();
   }
 
-  private static void readCentroids(Configuration conf, Path centroids) throws IOException {
-    SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centroids));
-    IntWritable key = new IntWritable();
-    Centroid value = new Centroid();
+  /*          +-----------------------------------------------------------+
+   *          |                NUMERO DI RIGHE DL FILE CSV                |
+   *          +-----------------------------------------------------------+
+   */
+  private static int getDatasetSize(Configuration conf, String INPUT_FILE) throws IOException
+  {
+    FileSystem fs = FileSystem.get(conf);
+    Path path = new Path(INPUT_FILE);
+    int count = 0;
+    try (BufferedReader reader =
+                 new BufferedReader(new InputStreamReader(fs.open(path)))) {
+      while (reader.readLine() != null) {
 
-    while (reader.next(key, value)) {
-      System.out.println(value);
+        count++;
+      }
     }
 
-    reader.close();
+    fs.close();
+
+    return count;
+  }
+
+  private static Point[]
+  generateRandomCentroids(int K, int DIM, String INPUT_FILE, Configuration conf) throws IOException
+  {
+    Point[] toReturn = new Point[K];
+    Random random = new Random();
+    Text word = new Text();
+
+    List<Integer> uniqueNumbers = new ArrayList<Integer>();
+
+    int pick;
+    int dataSetSize = getDatasetSize(conf, INPUT_FILE);
+
+    while(uniqueNumbers.size() < K) {
+      // Siccome prendo un CSV, la linea del nome delle colonne va scartata
+      pick = random.nextInt(dataSetSize - 1) + 1;
+      // Pick sara un numero da 1 a n-1 dove n e' il numero delle righe del file CSV
+      if(!uniqueNumbers.contains(pick)) {
+        uniqueNumbers.add(pick);
+      }
+    }
+
+    Path path = new Path(INPUT_FILE);
+    FileSystem hdfs = FileSystem.get(conf);
+
+    // Skippo la prima riga che contiene il nome delle features
+    int currentLine = 1;
+    String line;
+
+    int i = 0;
+
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(hdfs.open(path))))
+    {
+      // Finche una linea esiste vado avanti
+      while((line = reader.readLine()) != null) {
+
+        // Se la linea corrente e' nel vettore random, lo prendo
+        if (uniqueNumbers.contains(currentLine)) {
+
+          StringTokenizer itr = new StringTokenizer(line.toString(), ",");
+          // DIM = 3
+          // 1.1, 1.2, 1.3, 2.2, 2.2
+          List<DoubleWritable> pointsList = new ArrayList<DoubleWritable>();
+          int count = 0;
+
+          //add substring
+
+          String pointToCast = "";
+          while (itr.hasMoreTokens() && count < DIM)
+          {
+            word.set(itr.nextToken());
+            //0 --> 1.1
+            //1 --> 1.2
+            //2 --> 1.3
+            pointToCast += word.toString() + (count < (DIM-1) ? "," : ""); // 1.1,1.2,1.3
+            count++;
+          }
+
+          //1.1, 1.2, 1.3
+          toReturn[i] = new Point(pointToCast);
+          i++;
+
+          if(i == K) return toReturn;
+        }
+        currentLine++;
+      }
+    }
+
+    return toReturn;
   }
 }
 
