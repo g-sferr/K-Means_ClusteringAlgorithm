@@ -5,7 +5,9 @@ import org.apache.hadoop.io.DoubleWritable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Centroid extends Point {
   private IntWritable id;
@@ -106,6 +108,8 @@ public class Centroid extends Point {
       this.getCoordinates().set(i, new DoubleWritable(mean));
     }
   }
+
+
   
 }
 
