@@ -83,6 +83,10 @@ public class Kmeans {
     int k = Integer.parseInt(args[1]);
     long iterations = 0;
 
+    /*
+    * GS: Aggiungere Condizione criterio di arresto basata su n° Iterazioni
+    * */
+
     while (convergedCentroids < k)
     {
       System.out.println("=======================");
@@ -138,7 +142,6 @@ public class Kmeans {
     System.out.println("=======================");
     System.out.println("::NUMBER OF CONVERGED COUNT:: " + convergedCentroids);
     System.out.println("=======================");
-
 
     // readCentroids(conf, new Path(otherArgs[4]));
   }
