@@ -55,7 +55,7 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text> 
 
       Double distance = key.findEuclideanDistance((Point) meanCentroid);
 
-      result.set(meanCentroid.toString() + " - " + copy.toString() + " - Distance: " + distance);
+      result.set(meanCentroid.toString() + " - " + key.toString() + " - Distance: " + distance);
       context.write(null, result);
 
       if (distance <= threshold) {

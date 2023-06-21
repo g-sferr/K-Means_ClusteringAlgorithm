@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
+import org.apache.hadoop.io.SequenceFile;
 
 public class Centroid extends Point {
   private IntWritable id; // FRA: Attributo da lasciare?
@@ -120,7 +121,7 @@ public class Centroid extends Point {
     }
   }
 
-  public static List<Centroid> randomCentroidGenerator( String INPUT_FILE, String k, String DIM, String OUTPUT_FILE, Configuration conf) throws IOException
+  public static void randomCentroidGenerator( String INPUT_FILE, String k, String DIM, String OUTPUT_FILE, Configuration conf) throws IOException
   {
     final int numCentroid = Integer.parseInt(k);
     final int dimension = Integer.parseInt(DIM);
@@ -150,12 +151,34 @@ public class Centroid extends Point {
       while( ((line = reader.readLine()) != null) && (randomCentroidsList.size() < numCentroid) )
       {
         if (indexRandomCentroid.contains(currentLine))
-          randomCentroidsList.add(new Centroid(line, dimension));
+        {
+          Centroid c = new Centroid(line, dimension); 
+          c.setId(new IntWritable(currentLine)); 
+          randomCentroidsList.add(c);
+        }
         currentLine++;
       }
     }
-    return randomCentroidsList;
-}
+    
+    Path outputCentroidsPath = new Path(OUTPUT_FILE);
+    FileSystem fs = FileSystem.get(conf);
+
+    if (fs.exists(outputCentroidsPath)) {
+      System.out.println("Delete old output folder: " + outputCentroidsPath.toString());
+      fs.delete(outputCentroidsPath, true);
+    }
+
+    SequenceFile.Writer centroidWriter = SequenceFile.createWriter(conf,
+        SequenceFile.Writer.file(outputCentroidsPath),
+        SequenceFile.Writer.keyClass(IntWritable.class),
+        SequenceFile.Writer.valueClass(Centroid.class));
+    
+    for (Centroid c : randomCentroidsList) {
+      centroidWriter.append(c.getId(), c); 
+    }
+
+      centroidWriter.close();
+  }
 
   private static int getLineNumber(String INPUT_FILE, Configuration conf) throws IOException
   {

@@ -37,6 +37,7 @@ public class Point implements WritableComparable<Centroid> {
 
   Point (String coordinatesReceived, int configurationDimension)
   {
+    this.coordinates = new ArrayList<DoubleWritable>();
     Text word = new Text();
     StringTokenizer itr = new StringTokenizer(coordinatesReceived, ",");
 
