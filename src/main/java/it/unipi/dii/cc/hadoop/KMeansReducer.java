@@ -29,9 +29,14 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text> 
         dimension = Integer.parseInt(conf.get("dimension"));
         threshold = Double.parseDouble(conf.get("threshold"));
     }
-
+/*
+    Centroide0: Punto1, Punto2, Punto5
+    Centroide1: Punto0, Punto3
+    Centroide2: Punto4, Punto6
+*/
     @Override
-    public void reduce(Centroid key, Iterable<Point> values, Context context) throws IOException, InterruptedException {
+    public void reduce(Centroid key, Iterable<Point> values, Context context) throws IOException, InterruptedException
+    {
       Centroid meanCentroid = new Centroid(dimension);
       long numElements = 0;
       
@@ -47,6 +52,7 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text> 
       
       Centroid copy = Centroid.copy(meanCentroid);
       centroids.add(copy);
+
       Double distance = key.findEuclideanDistance((Point) meanCentroid);
 
       result.set(meanCentroid.toString() + " - " + copy.toString() + " - Distance: " + distance);
