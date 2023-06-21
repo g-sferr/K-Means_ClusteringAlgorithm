@@ -1,6 +1,7 @@
 package it.unipi.dii.cc.hadoop;
 
 import java.util.StringTokenizer;
+
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile;
@@ -20,7 +21,8 @@ public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
   private final Point point = new Point();
 
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context) throws IOException, InterruptedException
+  {
       Configuration conf = context.getConfiguration();
       Path centersPath = new Path(conf.get("centroidsFilename"));
       SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centersPath));
@@ -28,7 +30,8 @@ public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
       Centroid value = new Centroid();
       configurationDimension = Integer.parseInt(conf.get("dimension"));
       
-      while (reader.next(key, value)) {
+      while (reader.next(key, value))
+      {
           Centroid c = new Centroid(key, value.getCoordinates());
 
           centroids.add(c);
@@ -38,29 +41,42 @@ public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
   }
 
   @Override
-  public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+  public void map(Object key, Text value, Context context) throws IOException, InterruptedException
+  {
     StringTokenizer itr = new StringTokenizer(value.toString(), ",");
-    List<DoubleWritable> pointsList = new ArrayList<DoubleWritable>();
-    int count = 0;
 
-    while (itr.hasMoreTokens()) {
+    /*FRA: Adesso possiamo utilizzare il costruttore Point(String, int)*/
+
+    List<DoubleWritable> coordinatesList = new ArrayList<DoubleWritable>();
+
+    while (itr.hasMoreTokens() && (coordinatesList.size() < configurationDimension))
+    {
       word.set(itr.nextToken());
       Double coordinate = Double.valueOf(word.toString());
-      pointsList.add(new DoubleWritable(coordinate));
-      count = count + 1;
-      
-
-      if (count == configurationDimension) {
-        break;
-      }
+      coordinatesList.add(new DoubleWritable(coordinate));
     }
-    point.setCoordinates(pointsList);
+
+    point.setCoordinates(coordinatesList);
     Centroid closestCentroid = null;
     Double minimumDistance = Double.MAX_VALUE;
-    for (Centroid c1 : centroids) {
+    /*
+    Double distancefromFirt = centroids.get(0).findEuclideanDistance(point);
+    for(Centroid c : centroids.subList(1, centroids.size()))
+    {
+        Double distance = c.findEuclideanDistance(point);
+        if(distance < distancefromFirt)
+        {
+            distancefromFirt = distance;
+            closestCentroid = Centroid.copy(c);
+        }
+    }*/
+
+    for (Centroid c1 : centroids) // Trovo il Centroide più vicino al puntoPassato al mapper
+    {
       Double distance = c1.findEuclideanDistance(point);
 
-      if (distance < minimumDistance) {
+      if (distance < minimumDistance)
+      {
         minimumDistance = distance;
         closestCentroid = Centroid.copy(c1);
       }
