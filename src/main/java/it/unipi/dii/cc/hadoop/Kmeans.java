@@ -116,7 +116,7 @@ public class Kmeans {
       job.setReducerClass(KMeansReducer.class);
 
 
-      /*	*** _Gestione numerosità Reducer_ ***
+      /*	*** _Gestione numerosità task Reducer_ ***
 
       int K = Integer.parseInt(otherArgs[1]); //Parametro passato contenente il valore dei k cluster scelti
 
