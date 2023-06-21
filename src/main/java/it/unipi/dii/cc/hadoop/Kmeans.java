@@ -52,27 +52,8 @@ public class Kmeans {
 
     long start = System.currentTimeMillis();
 
-    //without randomly centroids comment from 57 to 75, 85, from 178 to 182
-
-    Job centroidsJob = Job.getInstance(conf, "RandomCentroid JAVA");
-
-    centroidsJob.setJarByClass(Kmeans.class);
-    centroidsJob.setMapperClass(RandomCentroidsMapper.class);
-    centroidsJob.setReducerClass(RandomCentroidsReducer.class);
-    centroidsJob.setMapOutputKeyClass(IntWritable.class);
-    centroidsJob.setMapOutputValueClass(Text.class);
-    centroidsJob.setOutputKeyClass(Text.class);
-    centroidsJob.setOutputValueClass(Text.class);
-
-    FileInputFormat.addInputPath(centroidsJob, new Path(otherArgs[0]));
-    FileOutputFormat.setOutputPath(centroidsJob, new Path(otherArgs[5]));
-
-    centroidsJob.setInputFormatClass(TextInputFormat.class);
-    centroidsJob.setOutputFormatClass(TextOutputFormat.class);
-
-    centroidsJob.getConfiguration().set("k", otherArgs[1]);
-    centroidsJob.getConfiguration().set("dimension", otherArgs[2]);
-    centroidsJob.getConfiguration().set("centroidsFilename", otherArgs[4]);
+    // Elezione di punti casuali a Centroidi
+    Centroid.randomCentroidGenerator(otherArgs[0], otherArgs[1], otherArgs[2], otherArgs[4], conf);
 
     Path output = new Path(otherArgs[5]);
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -81,8 +62,6 @@ public class Kmeans {
       System.out.println("Delete old output folder: " + output.toString());
       fs.delete(output, true);
     }
-
-    centroidsJob.waitForCompletion(true);
 
 //     Path centroidsOutput = new Path(otherArgs[4]);
 //     FileSystem fs = FileSystem.get(output.toUri(),conf);
@@ -98,14 +77,14 @@ public class Kmeans {
     System.out.println("FIRST CENTROIDS");
     System.out.println("=======================");
 
-    readCentroids(conf, new Path(otherArgs[4]));
+    //readCentroids(conf, new Path(otherArgs[4]));
 
     long convergedCentroids = 0;
-
     int k = Integer.parseInt(args[1]);
     long iterations = 0;
 
-    while (convergedCentroids < k) {
+    while (convergedCentroids < k)
+    {
       System.out.println("=======================");
       System.out.println("    ITERATION:    " + (iterations + 1));
       System.out.println("    CONVERGED CENTROIDS:    " + convergedCentroids);
@@ -118,7 +97,7 @@ public class Kmeans {
         fs.delete(output, true);
       }
 
-      Job job = Job.getInstance(conf, "Kmean JAVA " + (iterations + 1));
+      Job job = Job.getInstance(conf, "Kmeans Job " + (iterations + 1));
 
       job.getConfiguration().set("k", otherArgs[1]);
       job.getConfiguration().set("dimension", otherArgs[2]);
@@ -161,62 +140,9 @@ public class Kmeans {
     System.out.println("=======================");
 
 
-    readCentroids(conf, new Path(otherArgs[4]));
+    // readCentroids(conf, new Path(otherArgs[4]));
   }
 
-  public static Point[]
-  readRandomCentroids(int K, int DIM, String INPUT_FILE, Configuration conf) throws IOException
-  {
-    Point[] toReturn = new Point[K];
-    Random random = new Random();
-
-    List<Integer> uniqueNumbers = new ArrayList<Integer>();
-
-    int pick;
-
-    // FRA: Assegnare a dataSetSize il numero di righe del file INPUT_FILE
-    int dataSetSize = -1; //getDatasetSize(conf, INPUT_FILE);
-
-    while(uniqueNumbers.size() < K) {
-      // Siccome prendo un CSV, la linea del nome delle colonne va scartata
-      pick = random.nextInt(dataSetSize - 1) + 1;
-      // Pick sara un numero da 1 a n-1 dove n e' il numero delle righe del file CSV
-      if(!uniqueNumbers.contains(pick)) {
-        uniqueNumbers.add(pick);
-      }
-    }
-
-    Path path = new Path(INPUT_FILE);
-    FileSystem hdfs = FileSystem.get(conf);
-
-    // Skippo la prima riga che contiene il nome delle features
-    int currentLine = 1;
-    String line;
-
-    int i = 0;
-    //Bisogna leggere dal file INPUT_FILE i punti eletti come centroidi
-    /*
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(hdfs.open(path))))
-    {
-      // Finche una linea esiste vado avanti
-      while((line = reader.readLine()) != null) {
-
-        // Se la linea corrente e' nel vettore random, lo prendo
-        if (uniqueNumbers.contains(currentLine)) {
-
-          toReturn[i] = new Point(line);
-          i++;
-
-          if(i == K) return toReturn;
-        }
-
-        currentLine++;
-      }
-      */
-    }
-
-    return toReturn;
-  }
 
   private static void createCentroids(Configuration conf, Path centroids, int dimension) throws IOException {
     SequenceFile.Writer centroidWriter = SequenceFile.createWriter(conf,
@@ -255,100 +181,7 @@ public class Kmeans {
 
     centroidWriter.close();
   }
-
-  /*          +-----------------------------------------------------------+
-   *          |                NUMERO DI RIGHE DL FILE CSV                |
-   *          +-----------------------------------------------------------+
-   */
-  private static int getDatasetSize(Configuration conf, String INPUT_FILE) throws IOException
-  {
-    FileSystem fs = FileSystem.get(conf);
-    Path path = new Path(INPUT_FILE);
-    int count = 0;
-    try (BufferedReader reader =
-                 new BufferedReader(new InputStreamReader(fs.open(path)))) {
-      while (reader.readLine() != null) {
-
-        count++;
-      }
-    }
-
-    fs.close();
-
-    return count;
-  }
-
-  private static Point[]
-  generateRandomCentroids(int K, int DIM, String INPUT_FILE, Configuration conf) throws IOException
-  {
-    Point[] toReturn = new Point[K];
-    Random random = new Random();
-    Text word = new Text();
-
-    List<Integer> uniqueNumbers = new ArrayList<Integer>();
-
-    int pick;
-    int dataSetSize = getDatasetSize(conf, INPUT_FILE);
-
-    while(uniqueNumbers.size() < K) {
-      // Siccome prendo un CSV, la linea del nome delle colonne va scartata
-      pick = random.nextInt(dataSetSize - 1) + 1;
-      // Pick sara un numero da 1 a n-1 dove n e' il numero delle righe del file CSV
-      if(!uniqueNumbers.contains(pick)) {
-        uniqueNumbers.add(pick);
-      }
-    }
-
-    Path path = new Path(INPUT_FILE);
-    FileSystem hdfs = FileSystem.get(conf);
-
-    // Skippo la prima riga che contiene il nome delle features
-    int currentLine = 1;
-    String line;
-
-    int i = 0;
-
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(hdfs.open(path))))
-    {
-      // Finche una linea esiste vado avanti
-      while((line = reader.readLine()) != null) {
-
-        // Se la linea corrente e' nel vettore random, lo prendo
-        if (uniqueNumbers.contains(currentLine)) {
-
-          StringTokenizer itr = new StringTokenizer(line.toString(), ",");
-          // DIM = 3
-          // 1.1, 1.2, 1.3, 2.2, 2.2
-          List<DoubleWritable> pointsList = new ArrayList<DoubleWritable>();
-          int count = 0;
-
-          //add substring
-
-          String pointToCast = "";
-          while (itr.hasMoreTokens() && count < DIM)
-          {
-            word.set(itr.nextToken());
-            //0 --> 1.1
-            //1 --> 1.2
-            //2 --> 1.3
-            pointToCast += word.toString() + (count < (DIM-1) ? "," : ""); // 1.1,1.2,1.3
-            count++;
-          }
-
-          //1.1, 1.2, 1.3
-          toReturn[i] = new Point(pointToCast);
-          i++;
-
-          if(i == K) return toReturn;
-        }
-        currentLine++;
-      }
-    }
-
-    return toReturn;
-  }
 }
-
 // mvn clean package
 // hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans data.txt 7 3 0.5 centroids.txt output
 // cat /opt/yarn/logs/
