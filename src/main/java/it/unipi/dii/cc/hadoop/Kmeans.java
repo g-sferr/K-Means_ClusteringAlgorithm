@@ -114,6 +114,16 @@ public class Kmeans {
       job.setJarByClass(Kmeans.class);
       job.setMapperClass(KMeansMapper.class);
       job.setReducerClass(KMeansReducer.class);
+
+
+      /*	*** _Gestione numerosità Reducer_ ***
+
+      int K = Integer.parseInt(otherArgs[1]); //Parametro passato contenente il valore dei k cluster scelti
+
+      // Un reducer per ogni cluster
+      job.setNumReduceTasks(K);
+      */
+
       job.setMapOutputKeyClass(Centroid.class);
       job.setMapOutputValueClass(Point.class);
       job.setOutputKeyClass(Text.class);
