@@ -5,8 +5,10 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
 public class Point implements WritableComparable<Centroid> {
@@ -19,9 +21,8 @@ public class Point implements WritableComparable<Centroid> {
   Point(final int n) {
     this.coordinates = new ArrayList<DoubleWritable>();
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
       this.coordinates.add(new DoubleWritable(0.0));
-    }
 
   }
 
@@ -31,6 +32,20 @@ public class Point implements WritableComparable<Centroid> {
 
     for (final DoubleWritable element : coordinatesList) {
         this.coordinates.add(new DoubleWritable(element.get()));
+    }
+  }
+
+  Point (String coordinatesReceived, int configurationDimension)
+  {
+    this.coordinates = new ArrayList<DoubleWritable>();
+    Text word = new Text();
+    StringTokenizer itr = new StringTokenizer(coordinatesReceived, ",");
+
+    while (itr.hasMoreTokens() && (coordinates.size() < configurationDimension))
+    {
+      word.set(itr.nextToken());
+      Double coordinate = Double.valueOf(word.toString());
+      coordinates.add(new DoubleWritable(coordinate));
     }
   }
 
@@ -87,7 +102,9 @@ public class Point implements WritableComparable<Centroid> {
 /* ***************************************************************** */
 // Classe Point del progetto MapReduce
 /*
-private int attribute_n;
+public class Point implements Writable {
+
+    private int attribute_n;
     private double[] attributes = null;
     private int points_assigned;
 
