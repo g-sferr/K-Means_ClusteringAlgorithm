@@ -25,7 +25,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Kmeans {
+/*
+  private static boolean verifyStop(Point[] newC, Point[] oldC, int K, double EPS, int MAX_ITER, int i)
+  {
+    // Controllo se ho raggiunto il massimo numero di iterazioni
+    if (i >= MAX_ITER) return true;
 
+    //  Per ogni cluster, comparo i vecchi e i nuovi centroidi
+    for (int j = 0; j < K; j++) {
+
+      // System.out.println(newC[j].comparator(oldC[j]));
+
+      // Se uno dei centroidi differisce dal vecchio di piu di EPS non mi fermo
+      if(newC[j].comparator(oldC[j]) > EPS)
+        return false;
+    }
+
+    // Se in tutte le coordinate la variazione e' sotto la epsilon, allora e' tempo di fermarsi
+    return true;
+  }
+*/
   public static void main(String[] args) throws Exception {
 
     System.out.println(Config.K);
@@ -33,6 +52,9 @@ public class Kmeans {
 
     Configuration conf = new Configuration();
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+    List<Centroid> newCentroids;
+    List<Centroid> oldCentroids = null;
+
 
     if (otherArgs.length < 6) {
       System.out.println("=======================");
@@ -58,7 +80,7 @@ public class Kmeans {
     long start = System.currentTimeMillis();
 
     // Elezione di punti casuali a Centroidi
-    Centroid.randomCentroidGenerator(otherArgs[0], otherArgs[1], otherArgs[2], otherArgs[4], conf);
+    newCentroids = Centroid.randomCentroidGenerator(otherArgs[0], otherArgs[1], otherArgs[2], conf);
 
     Path output = new Path(otherArgs[5]);
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -68,21 +90,10 @@ public class Kmeans {
       fs.delete(output, true);
     }
 
-//     Path centroidsOutput = new Path(otherArgs[4]);
-//     FileSystem fs = FileSystem.get(output.toUri(),conf);
-
-//     if (fs.exists(centroidsOutput)) {
-//       System.out.println("Delete old output folder: " + output.toString());
-//       fs.delete(centroidsOutput, true);
-//     }
-
-    //createCentroids(conf, new Path(otherArgs[4]), Integer.parseInt(otherArgs[2]));
-
     System.out.println("=======================");
     System.out.println("FIRST CENTROIDS");
     System.out.println("=======================");
 
-    //readCentroids(conf, new Path(otherArgs[4]));
 
     long convergedCentroids = 0;
     int k = Integer.parseInt(args[1]);
@@ -90,10 +101,24 @@ public class Kmeans {
 
     /*
     * GS: Aggiungere Condizione criterio di arresto basata su n° Iterazioni
+    *
     * */
+
+    // Se il job ha finito correttamente o no
+    boolean succeded = true;
+
+    String iterationOutputPath = "";
+    String OUTPUT_FILE = otherArgs[5];
 
     while (convergedCentroids < k)
     {
+      iterations++;
+      iterationOutputPath = OUTPUT_FILE + "/iteration-" + iterations;
+
+      // Passo i centroidi ai mapper
+      for ( Centroid c : newCentroids)
+        conf.set("center_"+c.getId().toString(), c.toString());
+
       System.out.println("=======================");
       System.out.println("    ITERATION:    " + (iterations + 1));
       System.out.println("    CONVERGED CENTROIDS:    " + convergedCentroids);
@@ -119,18 +144,43 @@ public class Kmeans {
       job.setJarByClass(Kmeans.class);
       job.setMapperClass(KMeansMapper.class);
       job.setReducerClass(KMeansReducer.class);
+
+
+      /*	*** _Gestione numerosità task Reducer_ ***
+
+      int K = Integer.parseInt(otherArgs[1]); //Parametro passato contenente il valore dei k cluster scelti
+
+      // Un reducer per ogni cluster
+      job.setNumReduceTasks(K);
+      */
+
       job.setMapOutputKeyClass(Centroid.class);
       job.setMapOutputValueClass(Point.class);
       job.setOutputKeyClass(Text.class);
       job.setOutputValueClass(Text.class);
 
       FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
-      FileOutputFormat.setOutputPath(job, new Path(otherArgs[5]));
+      FileOutputFormat.setOutputPath(job, new Path(iterationOutputPath));
 
-      job.waitForCompletion(true);
+      //job.waitForCompletion(true);
+      succeded = job.waitForCompletion(true);
+
+      if(!succeded){
+        System.err.println("Error at iteration "+i);
+        System.exit(2);
+      }
+
+      // Sposto newCentroids in oldCenters
+      for ( Centroid c : newCentroids)
+        oldCentroids.add(c.copy());
+
+      // Dopodiche recupero newCenters dal file risultato dell'iterazione corrente
+      newCentroids = //iterazione precedente
+      newCenters = recoverResults(K, iterationOutputPath, conf);
 
       convergedCentroids = job.getCounters().findCounter(KMeansReducer.Counter.CONVERGED_COUNT).getValue();
-      iterations++;
+
+      //stop = verifyStop(newCenters, oldCenters, K, EPS, MAX_ITER, i);
     }
 
     long end = System.currentTimeMillis();

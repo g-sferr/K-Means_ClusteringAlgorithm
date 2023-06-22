@@ -74,8 +74,8 @@ public class Centroid extends Point {
   }
 
   // Make a deep copy of the centroid 
-  public static Centroid copy(final Centroid old) {
-    return new Centroid(old.getId(), old.getCoordinates());
+  public Centroid copy() {
+    return new Centroid(this.getId(), this.getCoordinates());
   }
 
 
@@ -121,7 +121,8 @@ public class Centroid extends Point {
     }
   }
 
-  public static void randomCentroidGenerator( String INPUT_FILE, String k, String DIM, String OUTPUT_FILE, Configuration conf) throws IOException
+  public static List<Centroid> randomCentroidGenerator( String INPUT_FILE, String k,
+                                              String DIM, Configuration conf) throws IOException
   {
     final int numCentroid = Integer.parseInt(k);
     final int dimension = Integer.parseInt(DIM);
@@ -159,25 +160,7 @@ public class Centroid extends Point {
         currentLine++;
       }
     }
-    
-    Path outputCentroidsPath = new Path(OUTPUT_FILE);
-    FileSystem fs = FileSystem.get(conf);
-
-    if (fs.exists(outputCentroidsPath)) {
-      System.out.println("Delete old output folder: " + outputCentroidsPath.toString());
-      fs.delete(outputCentroidsPath, true);
-    }
-
-    SequenceFile.Writer centroidWriter = SequenceFile.createWriter(conf,
-        SequenceFile.Writer.file(outputCentroidsPath),
-        SequenceFile.Writer.keyClass(IntWritable.class),
-        SequenceFile.Writer.valueClass(Centroid.class));
-    
-    for (Centroid c : randomCentroidsList) {
-      centroidWriter.append(c.getId(), c); 
-    }
-
-      centroidWriter.close();
+    return randomCentroidsList;
   }
 
   private static int getLineNumber(String INPUT_FILE, Configuration conf) throws IOException
