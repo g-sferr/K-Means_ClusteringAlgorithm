@@ -27,6 +27,10 @@ import java.util.List;
 public class Kmeans {
 
   public static void main(String[] args) throws Exception {
+
+    System.out.println(Config.K);
+
+
     Configuration conf = new Configuration();
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
@@ -49,6 +53,7 @@ public class Kmeans {
     System.out.println("=======================");
     System.out.println("args[5]: <output>=" + otherArgs[5]);
     System.out.println("=======================");
+
 
     long start = System.currentTimeMillis();
 
