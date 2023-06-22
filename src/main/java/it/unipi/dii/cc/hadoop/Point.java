@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -30,6 +31,8 @@ public class Point implements WritableComparable<Centroid> {
   Point(final List<DoubleWritable> coordinatesList) {
     this.coordinates = new ArrayList<DoubleWritable>();
 
+    // coordinatesList.forEach(element -> this.coordinates.add(new DoubleWritable(element.get())));
+
     for (final DoubleWritable element : coordinatesList) {
         this.coordinates.add(new DoubleWritable(element.get()));
     }
@@ -38,9 +41,12 @@ public class Point implements WritableComparable<Centroid> {
   Point (String coordinatesReceived, int configurationDimension)
   {
     this.coordinates = new ArrayList<DoubleWritable>();
+
+    // List<String> s = Arrays.stream(coordinatesReceived.split(",", configurationDimension)).toList();
+    // s.forEach(coordinate ->  coordinates.add(new DoubleWritable(Double.parseDouble(coordinate))));
+
     Text word = new Text();
     StringTokenizer itr = new StringTokenizer(coordinatesReceived, ",");
-
     while (itr.hasMoreTokens() && (coordinates.size() < configurationDimension))
     {
       word.set(itr.nextToken());
@@ -52,6 +58,7 @@ public class Point implements WritableComparable<Centroid> {
   @Override
   public void write(final DataOutput out) throws IOException {
     out.writeInt(this.coordinates.size());
+    // this.coordinates.forEach(value -> out.writeDouble(value.get()));
 
     for (final DoubleWritable value : this.coordinates) {
         out.writeDouble(value.get());

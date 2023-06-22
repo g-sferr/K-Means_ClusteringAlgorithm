@@ -14,13 +14,15 @@ public class Config {
     public static final String MAX_ITER = load("MAX_ITER");
     public static final String OUTPUT = load("OUTPUT");
 
-
+    /**
+     * Read the value associated to the key
+     * @param key the property key.
+     * @return value associated to the key
+     */
     private static String load(String key) {
         Properties prop = new Properties();
         try {
-            String configFilePath = "config.properties";
-            FileInputStream propsInput = new FileInputStream(configFilePath);
-            prop.load(propsInput);
+            prop.load(new FileInputStream("config.properties"));
         } catch (IOException e) {
             e.printStackTrace();
         }

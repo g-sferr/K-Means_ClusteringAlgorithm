@@ -57,7 +57,7 @@ public class Kmeans {
 
     if (otherArgs.length < 2) {
       System.out.println("=======================");
-      System.err.println("Usage: kmeans <input> <k> <dimension> <threshold> <centroidsFilename> <output>");
+      System.err.println("Usage: kmeans <input> <output>");
       System.out.println("=======================");
       System.exit(2);
     }
@@ -65,13 +65,15 @@ public class Kmeans {
     System.out.println("=======================");
     System.out.println("args[0]: <input>=" + otherArgs[0]);
     System.out.println("=======================");
-    System.out.println("args[1]: <k>=" + Config.K);
+    System.out.println("args[1]: <output>=" + otherArgs[1]);
     System.out.println("=======================");
-    System.out.println("args[2]: <dimension>=" + Config.DIMENSIONS);
+    System.out.println("<k>=" + Config.K);
     System.out.println("=======================");
-    System.out.println("args[3]: <threshold>=" + Config.THRESHOLD);
+    System.out.println("<dimension>=" + Config.DIMENSIONS);
     System.out.println("=======================");
-    System.out.println("args[5]: <output>=" + otherArgs[1]);
+    System.out.println("<threshold>=" + Config.THRESHOLD);
+    System.out.println("=======================");
+    System.out.println("<max iter>=" + Config.MAX_ITER);
     System.out.println("=======================");
 
 
@@ -114,6 +116,8 @@ public class Kmeans {
     {
       iterations++;
       iterationOutputPath = OUTPUT_FILE + "/iteration-" + iterations;
+
+      // newCentroids.forEach(c -> conf.set("centroid_"+c.getId().toString(), c.toString()));
 
       // Passo i centroidi ai mapper
       for ( Centroid c : newCentroids)
@@ -169,6 +173,7 @@ public class Kmeans {
       }
 
       // Sposto newCentroids in oldCenters
+      // newCentroids.forEach(c -> oldCentroids.add(c.copy()));
       for ( Centroid c : newCentroids)
         oldCentroids.add(c.copy());
 

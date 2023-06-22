@@ -1,17 +1,14 @@
 package it.unipi.dii.cc.hadoop;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.Text;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.StringTokenizer;
 import org.apache.hadoop.io.SequenceFile;
 
 public class Centroid extends Point {
@@ -154,8 +151,7 @@ public class Centroid extends Point {
       {
         if (indexRandomCentroid.contains(currentLine))
         {
-          Centroid c = new Centroid(line, dimension, ID);
-          randomCentroidsList.add(c);
+          randomCentroidsList.add(new Centroid(line, dimension, ID));
           ID++;
         }
         currentLine++;
@@ -164,6 +160,13 @@ public class Centroid extends Point {
     return randomCentroidsList;
   }
 
+  /**
+   * Calculate the number of lines of the file passed in input
+   * @param INPUT_FILE
+   * @param conf
+   * @return number of lines of the file in input
+   * @throws IOException
+   */
   private static int getLineNumber(String INPUT_FILE, Configuration conf) throws IOException
   {
     FileSystem fs = FileSystem.get(conf);
