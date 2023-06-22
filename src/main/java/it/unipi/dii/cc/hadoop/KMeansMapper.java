@@ -15,7 +15,6 @@ import org.apache.hadoop.io.DoubleWritable;
 
 public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
   private final List<Centroid> centroids = new ArrayList<>();
-  private final static IntWritable one = new IntWritable(1);
   private Text word = new Text();
   private int configurationDimension;
   private final Point point = new Point();
@@ -78,7 +77,7 @@ public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
       if (distance < minimumDistance)
       {
         minimumDistance = distance;
-        closestCentroid = Centroid.copy(c1);
+        closestCentroid = c1.copy();
       }
     }
 
