@@ -35,10 +35,10 @@ public class Centroid extends Point {
     this.id = new IntWritable(id.get());
   }
 
-  Centroid(String coordinates, int configurationDimension)
+  Centroid(String coordinates, int configurationDimension, int ID)
   {
     super(coordinates, configurationDimension);
-    this.id = new IntWritable(-1);
+    this.id = new IntWritable(ID);
   }
 
   public IntWritable getId() {
@@ -145,6 +145,7 @@ public class Centroid extends Point {
     FileSystem hdfs = FileSystem.get(conf);
 
     int currentLine = 0;
+    int ID = 0;
     String line;
 
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(hdfs.open(path))))
@@ -153,9 +154,9 @@ public class Centroid extends Point {
       {
         if (indexRandomCentroid.contains(currentLine))
         {
-          Centroid c = new Centroid(line, dimension); 
-          c.setId(new IntWritable(currentLine)); 
+          Centroid c = new Centroid(line, dimension, ID);
           randomCentroidsList.add(c);
+          ID++;
         }
         currentLine++;
       }
