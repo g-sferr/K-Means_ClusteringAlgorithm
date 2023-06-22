@@ -49,9 +49,8 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text> 
       meanCentroid.setId(key.getId());
 
       meanCentroid.calculateMean(numElements);
-      
-      Centroid copy = Centroid.copy(meanCentroid);
-      centroids.add(copy);
+
+      centroids.add(meanCentroid.copy());
 
       Double distance = key.findEuclideanDistance((Point) meanCentroid);
 
