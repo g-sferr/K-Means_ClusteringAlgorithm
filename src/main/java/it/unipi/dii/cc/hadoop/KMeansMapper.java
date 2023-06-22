@@ -18,14 +18,13 @@ public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
   private Text word = new Text();
   private int configurationDimension;
 
-
   @Override
   protected void setup(Context context) throws IOException, InterruptedException
   {
       Configuration conf = context.getConfiguration();
 
       //Path centersPath = new Path(conf.get("centroidsFilename"));
-      //SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centersPath));
+      //SequenceFile.Reader reader = new SequenceFile.Reader(conf SequenceFile.Reader.file(centersPath));
       IntWritable key = new IntWritable();
       Centroid value = new Centroid();
       configurationDimension = Integer.parseInt(conf.get("dimension"));
@@ -58,8 +57,6 @@ public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
         closestCentroid = c1.copy();
       }
     }
-
     context.write(closestCentroid, point);
   }
-
 }

@@ -13,7 +13,8 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 
 
-public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text> {
+public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text>
+{
     private Text result = new Text("");
     private static int dimension;
     private static double threshold;
@@ -23,9 +24,10 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text> 
     }
     
     @Override
-    protected void setup(Context context) throws IOException, InterruptedException {
+    protected void setup(Context context) throws IOException, InterruptedException
+    {
         Configuration conf = context.getConfiguration();
-        
+
         dimension = Integer.parseInt(conf.get("dimension"));
         threshold = Double.parseDouble(conf.get("threshold"));
     }
@@ -40,14 +42,13 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text> 
       Centroid meanCentroid = new Centroid(dimension);
       long numElements = 0;
       
-      for (Point currentPoint : values) {
-        
+      for (Point currentPoint : values)
+      {
         meanCentroid.add(currentPoint);
         numElements++;
       }
 
       meanCentroid.setId(key.getId());
-
       meanCentroid.calculateMean(numElements);
 
       centroids.add(meanCentroid.copy());
@@ -57,13 +58,15 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text> 
       result.set(meanCentroid.toString() + " - " + key.toString() + " - Distance: " + distance);
       context.write(null, result);
 
-      if (distance <= threshold) {
+      if (distance <= threshold)
+      {
         context.getCounter(Counter.CONVERGED_COUNT).increment(1);
       }
     }
 
     @Override
-    protected void cleanup(Context context) throws IOException, InterruptedException {
+    protected void cleanup(Context context) throws IOException, InterruptedException
+    {
       super.cleanup(context);
 
       Configuration conf = context.getConfiguration();
@@ -80,9 +83,9 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text> 
           SequenceFile.Writer.keyClass(IntWritable.class),
           SequenceFile.Writer.valueClass(Centroid.class));
      
-      for (Centroid c : centroids) {
-        centroidWriter.append(c.getId(), c); 
-      }
+      for (Centroid c : centroids)
+        centroidWriter.append(c.getId(), c);
+
 
       centroidWriter.close();
     }

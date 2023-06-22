@@ -4,8 +4,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class Config {
-
+public class Config
+{
     public static final String INPUT_FILE = load("INPUT_FILE");
     public static final String K = load("K");
     public static final String DIMENSIONS = load("DIMENSIONS");
@@ -15,16 +15,19 @@ public class Config {
     public static final String OUTPUT = load("OUTPUT");
 
 
-    private static String load(String key) {
+    private static String load(String key)
+    {
         Properties prop = new Properties();
-        try {
+        try
+        {
             String configFilePath = "config.properties";
             FileInputStream propsInput = new FileInputStream(configFilePath);
             prop.load(propsInput);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return prop.getProperty(key);
     }
-
 }

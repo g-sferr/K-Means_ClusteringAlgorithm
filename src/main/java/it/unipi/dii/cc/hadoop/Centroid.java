@@ -14,94 +14,96 @@ import java.util.Random;
 import java.util.StringTokenizer;
 import org.apache.hadoop.io.SequenceFile;
 
-public class Centroid extends Point {
+public class Centroid extends Point
+{
   private IntWritable id; // FRA: Attributo da lasciare?
 
-  Centroid() {
+  Centroid()
+  {
     super();
-
     this.id = new IntWritable(-1);
   }
-
-  Centroid(int n) {
+  Centroid(int n)
+  {
     super(n);
-
     this.id = new IntWritable(-1);
   }
-
-  Centroid(IntWritable id, List<DoubleWritable> coordinates) {
+  Centroid(IntWritable id, List<DoubleWritable> coordinates)
+  {
     super(coordinates);
-
     this.id = new IntWritable(id.get());
   }
-
   Centroid(String coordinates, int configurationDimension, int ID)
   {
     super(coordinates, configurationDimension);
     this.id = new IntWritable(ID);
   }
 
-  public IntWritable getId() {
-    return this.id;
-  }
+  public IntWritable getId(){ return this.id; }
 
-  public void setId(IntWritable newId){
+  public void setId(IntWritable newId)
+  {
     this.id = new IntWritable(newId.get());
   }
 
   @Override
-  public void write(DataOutput out) throws IOException {
+  public void write(DataOutput out) throws IOException
+  {
     super.write(out);
-
     out.writeInt(this.getId().get());
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException {
+  public void readFields(DataInput in) throws IOException
+  {
     super.readFields(in);
-
     this.id = new IntWritable(in.readInt());
   }
 
   @Override
-  public String toString() {
+  public String toString()
+  {
     return this.getId().get() + ";" + super.toString();
   }
 
   @Override
-  public int compareTo(Centroid otherCentroid) {
+  public int compareTo(Centroid otherCentroid)
+  {
     return Integer.compare(this.getId().get(), otherCentroid.getId().get());
   }
 
   // Make a deep copy of the centroid 
-  public Centroid copy() {
+  public Centroid copy()
+  {
     return new Centroid(this.getId(), this.getCoordinates());
   }
 
-
-  public Double findEuclideanDistance(Point point) {
+  public Double findEuclideanDistance(Point point)
+  {
     int lenght = point.getCoordinates().size();
     List<DoubleWritable> pointCoordinates = point.getCoordinates();
     Double sum = 0.0;
 
-    for (int i = 0; i < lenght; i++) {
-        Double difference = this.getCoordinates().get(i).get() - pointCoordinates.get(i).get();
+    for (int i = 0; i < lenght; i++)
+    {
+        Double difference = this.getCoordinates().get(i).get()
+                              - pointCoordinates.get(i).get();
         sum += Math.pow(difference, 2);
-
     }
-
     return Math.sqrt(sum);
   }
   
-  public void add(Point currentPoint) {
+  public void add(Point currentPoint)
+  {
     int length = currentPoint.getCoordinates().size();
     List<DoubleWritable> currentPointCoordinates = currentPoint.getCoordinates();
 
-    for(int i = 0; i < length; i++){
+    for(int i = 0; i < length; i++)
+    {
       Double centroidCoordinate = this.getCoordinates().get(i).get();
       Double currentPointCoordinate = currentPointCoordinates.get(i).get();
+
       Double sum = centroidCoordinate + currentPointCoordinate;
-      
       this.getCoordinates().set(i, new DoubleWritable(sum));       
     }
   }
@@ -116,7 +118,6 @@ public class Centroid extends Point {
       Double mean = centroidCoordinate / numElements;
 
       mean = (double) Math.round(mean * 1000000d) / 1000000d; // FRA: Frare prova con e senza questa approssimazione
-
       this.getCoordinates().set(i, new DoubleWritable(mean));
     }
   }
@@ -164,21 +165,22 @@ public class Centroid extends Point {
     return randomCentroidsList;
   }
 
-  private static int getLineNumber(String INPUT_FILE, Configuration conf) throws IOException
+  private static int getLineNumber(String INPUT_FILE,
+                                   Configuration conf) throws IOException
   {
     FileSystem fs = FileSystem.get(conf);
     Path path = new Path(INPUT_FILE);
-
     int count = 0;
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(path)))) {
-      while (reader.readLine() != null) {
+
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(path))))
+    {
+      while (reader.readLine() != null)
+      {
         count++;
       }
     }
     fs.close();
+
     return count;
   }
-  
 }
-
-
