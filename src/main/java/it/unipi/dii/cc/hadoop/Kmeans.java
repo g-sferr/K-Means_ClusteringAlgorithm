@@ -47,8 +47,7 @@ public class Kmeans {
 */
   public static void main(String[] args) throws Exception {
 
-    System.out.println(Config.K);
-
+    System.out.println();
 
     Configuration conf = new Configuration();
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
@@ -56,33 +55,32 @@ public class Kmeans {
     List<Centroid> oldCentroids = null;
 
 
-    if (otherArgs.length < 6) {
+    if (otherArgs.length < 2) {
       System.out.println("=======================");
       System.err.println("Usage: kmeans <input> <k> <dimension> <threshold> <centroidsFilename> <output>");
       System.out.println("=======================");
       System.exit(2);
     }
+
     System.out.println("=======================");
     System.out.println("args[0]: <input>=" + otherArgs[0]);
     System.out.println("=======================");
-    System.out.println("args[1]: <k>=" + otherArgs[1]);
+    System.out.println("args[1]: <k>=" + Config.K);
     System.out.println("=======================");
-    System.out.println("args[2]: <dimension>=" + otherArgs[2]);
+    System.out.println("args[2]: <dimension>=" + Config.DIMENSIONS);
     System.out.println("=======================");
-    System.out.println("args[3]: <threshold>=" + otherArgs[3]);
+    System.out.println("args[3]: <threshold>=" + Config.THRESHOLD);
     System.out.println("=======================");
-    System.out.println("args[4]: <centroidsFilename>=" + otherArgs[4]);
-    System.out.println("=======================");
-    System.out.println("args[5]: <output>=" + otherArgs[5]);
+    System.out.println("args[5]: <output>=" + otherArgs[1]);
     System.out.println("=======================");
 
 
     long start = System.currentTimeMillis();
 
     // Elezione di punti casuali a Centroidi
-    newCentroids = Centroid.randomCentroidGenerator(otherArgs[0], otherArgs[1], otherArgs[2], conf);
+    newCentroids = Centroid.randomCentroidGenerator(otherArgs[0], Config.K, Config.DIMENSIONS, conf);
 
-    Path output = new Path(otherArgs[5]);
+    Path output = new Path(otherArgs[1]);
     FileSystem fs = FileSystem.get(output.toUri(), conf);
 
     if (fs.exists(output)) {
@@ -96,7 +94,6 @@ public class Kmeans {
 
 
     long convergedCentroids = 0;
-    int k = Integer.parseInt(args[1]);
     long iterations = 0;
 
     /*
@@ -108,35 +105,35 @@ public class Kmeans {
     boolean succeded = true;
 
     String iterationOutputPath = "";
-    String OUTPUT_FILE = otherArgs[5];
+    String OUTPUT_FILE = otherArgs[1];
+    conf.set("k", Config.K);
+    conf.set("threshold", Config.THRESHOLD);
+    conf.set("dimension", Config.DIMENSIONS);
 
-    while (convergedCentroids < k)
+    while ((convergedCentroids < Integer.parseInt(Config.K)) && (iterations < Integer.parseInt(Config.MAX_ITER)))
     {
       iterations++;
       iterationOutputPath = OUTPUT_FILE + "/iteration-" + iterations;
 
       // Passo i centroidi ai mapper
       for ( Centroid c : newCentroids)
-        conf.set("center_"+c.getId().toString(), c.toString());
+        conf.set("centroid_"+c.getId().toString(), c.toString());
 
       System.out.println("=======================");
       System.out.println("    ITERATION:    " + (iterations + 1));
       System.out.println("    CONVERGED CENTROIDS:    " + convergedCentroids);
       System.out.println("=======================");
-
-      if (fs.exists(output)) {
+/*
+      if (fs.exists(iterationOutputPath)) {
         System.out.println("=======================");
         System.out.println("DELETE OLD OUTPUT FOLDER: " + output.toString());
         System.out.println("=======================");
         fs.delete(output, true);
       }
-
+*/
       Job job = Job.getInstance(conf, "Kmeans Job " + (iterations + 1));
 
-      job.getConfiguration().set("k", otherArgs[1]);
-      job.getConfiguration().set("dimension", otherArgs[2]);
-      job.getConfiguration().set("threshold", otherArgs[3]);
-      job.getConfiguration().set("centroidsFilename", otherArgs[4]);
+      //job.getConfiguration().set("centroidsFilename", otherArgs[4]);
 
       job.setInputFormatClass(TextInputFormat.class);
       job.setOutputFormatClass(TextOutputFormat.class);
@@ -151,6 +148,7 @@ public class Kmeans {
       int K = Integer.parseInt(otherArgs[1]); //Parametro passato contenente il valore dei k cluster scelti
 
       // Un reducer per ogni cluster
+      job.setCombinerClass(KMeansReducer.class);
       job.setNumReduceTasks(K);
       */
 
@@ -166,7 +164,7 @@ public class Kmeans {
       succeded = job.waitForCompletion(true);
 
       if(!succeded){
-        System.err.println("Error at iteration "+i);
+        System.err.println("Error at iteration "+iterations);
         System.exit(2);
       }
 
@@ -174,9 +172,13 @@ public class Kmeans {
       for ( Centroid c : newCentroids)
         oldCentroids.add(c.copy());
 
+
+
+
+
       // Dopodiche recupero newCenters dal file risultato dell'iterazione corrente
-      newCentroids = //iterazione precedente
-      newCenters = recoverResults(K, iterationOutputPath, conf);
+      //newCentroids = updateNewCentroid();//iterazione precedente
+      //newCenters = recoverResults(K, iterationOutputPath, conf);
 
       convergedCentroids = job.getCounters().findCounter(KMeansReducer.Counter.CONVERGED_COUNT).getValue();
 
