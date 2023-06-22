@@ -17,58 +17,36 @@ public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
   private final List<Centroid> centroids = new ArrayList<>();
   private Text word = new Text();
   private int configurationDimension;
-  private final Point point = new Point();
+
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException
   {
       Configuration conf = context.getConfiguration();
-      Path centersPath = new Path(conf.get("centroidsFilename"));
-      SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centersPath));
+
+      //Path centersPath = new Path(conf.get("centroidsFilename"));
+      //SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centersPath));
       IntWritable key = new IntWritable();
       Centroid value = new Centroid();
       configurationDimension = Integer.parseInt(conf.get("dimension"));
-      
-      while (reader.next(key, value))
+      int k = Integer.parseInt(conf.get("k"));
+
+      for(int i = 0; i < k; i++) // es: 0;0.1,0.2
       {
-          Centroid c = new Centroid(key, value.getCoordinates());
-
-          centroids.add(c);
+          //Utilizzare String.split() al posto di itr???
+          StringTokenizer itr = new StringTokenizer(context.getConfiguration().get("center_" + i), ";");
+          String[] splittedCentroid = context.getConfiguration().get("center_" + i).split(";");
+          centroids.add( new Centroid(splittedCentroid[1], configurationDimension, Integer.parseInt(splittedCentroid[0])) );
       }
-
-      reader.close();
   }
 
   @Override
   public void map(Object key, Text value, Context context) throws IOException, InterruptedException
   {
-    StringTokenizer itr = new StringTokenizer(value.toString(), ",");
+    Point point = new Point(value.toString(), configurationDimension);
 
-    /*FRA: Adesso possiamo utilizzare il costruttore Point(String, int)*/
-
-    List<DoubleWritable> coordinatesList = new ArrayList<DoubleWritable>();
-
-    while (itr.hasMoreTokens() && (coordinatesList.size() < configurationDimension))
-    {
-      word.set(itr.nextToken());
-      Double coordinate = Double.valueOf(word.toString());
-      coordinatesList.add(new DoubleWritable(coordinate));
-    }
-
-    point.setCoordinates(coordinatesList);
     Centroid closestCentroid = null;
     Double minimumDistance = Double.MAX_VALUE;
-    /*
-    Double distancefromFirt = centroids.get(0).findEuclideanDistance(point);
-    for(Centroid c : centroids.subList(1, centroids.size()))
-    {
-        Double distance = c.findEuclideanDistance(point);
-        if(distance < distancefromFirt)
-        {
-            distancefromFirt = distance;
-            closestCentroid = Centroid.copy(c);
-        }
-    }*/
 
     for (Centroid c1 : centroids) // Trovo il Centroide più vicino al puntoPassato al mapper
     {
