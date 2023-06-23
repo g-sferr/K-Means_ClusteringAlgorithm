@@ -1,10 +1,13 @@
 package it.unipi.dii.cc.hadoop;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.DoubleWritable;
@@ -26,6 +29,49 @@ import java.util.List;
 
 public class Kmeans
 {
+
+  // Recupera dai file di iterazione i centroidi restituiti dal reducer dell'iterazione precedente
+  private static List<Centroid> recoverResults(int K, String OUT_FILE, Configuration conf) throws IOException
+  {
+    List<Centroid> toReturn = new ArrayList<>();
+
+    Path path = new Path(OUT_FILE);
+    FileSystem hdfs = FileSystem.get(conf);
+
+    FileStatus[] status = hdfs.listStatus(path);
+
+    String centroidString = "";
+    String line;
+
+    // status contiene una lista con tutti i file nella cartella /iteration-X
+
+    // Check _SUCCESS
+    if (!status[0].getPath().getName().startsWith("_SUCCESS"))
+    {
+      System.err.println("Error occurred at recovery partial files");
+      System.exit(1);
+    }
+
+    // Parto dal secondo file perché il primo mi dice se ho avuto successo o se ho fallito
+    for (int i = 1; i < status.length; i++)
+    {
+      Path file = status[i].getPath();
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(hdfs.open(file))))
+      {
+        while ((line = reader.readLine()) != null)
+        {
+          centroidString += line.split("\t")[1] + ";";
+        }
+      }
+    }
+    String[] centroidList = centroidString.split(";");
+
+    for (int j = 0; j < K; j++)
+      toReturn.add(new Centroid(Integer.parseInt(centroidList[j])));
+
+    return toReturn;
+  }
+
   public static void main(String[] args) throws Exception
   {
     //System.out.println();
@@ -94,12 +140,14 @@ public class Kmeans
       iterations++;
       iterationOutputPath = OUTPUT_FILE + "/iteration-" + iterations;
 
+
       // Passo i centroidi ai mapper
       for ( Centroid c : newCentroids)
-        conf.set("centroid_"+c.getId().toString(), c.toString());
+        conf.set("centroid_" + c.getId().toString(), c.toString());
+
 
       System.out.println("=======================");
-      System.out.println("    ITERATION:    " + (iterations + 1));
+      System.out.println("    ITERATION:    " + (iterations));
       System.out.println("    CONVERGED CENTROIDS:    " + convergedCentroids);
       System.out.println("=======================");
 /*
@@ -110,8 +158,7 @@ public class Kmeans
         fs.delete(output, true);
       }
 */
-      //Controllare se usare .getInstance oppure new Job()
-      Job job = Job.getInstance(conf, "Kmeans Job " + (iterations + 1));
+      Job job = Job.getInstance(conf, "Kmeans Job " + (iterations));
 
       //job.getConfiguration().set("centroidsFilename", otherArgs[4]);
 
@@ -123,11 +170,10 @@ public class Kmeans
       job.setReducerClass(KMeansReducer.class);
 
 
-      /**** _Gestione numerosità task Reducer_ ***
-      int K = Integer.parseInt(otherArgs[1]); //Parametro passato contenente il valore dei k cluster scelti
-      job.setCombinerClass(KMeansReducer.class); //Controllare se ha a che fare con il set dei task sotto
+      /**** _Gestione numerosità task Reducer_ *** */
+      int K = Integer.parseInt(Config.K); //Parametro passato contenente il valore dei k cluster scelti
+      //job.setCombinerClass(KMeansReducer.class); //Controllare se ha a che fare con il set dei task sotto
       job.setNumReduceTasks(K); // Un reducer per ogni cluster
-      */
 
       job.setMapOutputKeyClass(Centroid.class);
       job.setMapOutputValueClass(Point.class);
@@ -151,8 +197,7 @@ public class Kmeans
 
       // Dopodiche recupero newCenters dal file risultato dell'iterazione corrente
 
-      //newCentroids = updateNewCentroid();//iterazione precedente
-      //newCenters = recoverResults(K, iterationOutputPath, conf);
+      newCentroids = recoverResults(K, iterationOutputPath, conf);
 
       convergedCentroids = job.getCounters().findCounter(KMeansReducer.Counter.CONVERGED_COUNT).getValue();
 
