@@ -64,6 +64,8 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text>
       }
     }
 
+    /*
+
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException
     {
@@ -89,4 +91,6 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text>
 
       centroidWriter.close();
     }
+
+     */
   }
