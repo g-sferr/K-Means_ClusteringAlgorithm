@@ -196,12 +196,10 @@ public class Kmeans
         oldCentroids.add(c.copy());
 
       // Dopodiche recupero newCenters dal file risultato dell'iterazione corrente
-
       newCentroids = recoverResults(K, iterationOutputPath, conf);
 
       convergedCentroids = job.getCounters().findCounter(KMeansReducer.Counter.CONVERGED_COUNT).getValue();
 
-      //stop = verifyStop(newCenters, oldCenters, K, EPS, MAX_ITER, i);
     }
 
     long end = System.currentTimeMillis();
@@ -219,38 +217,5 @@ public class Kmeans
     System.out.println("::NUMBER OF CONVERGED COUNT:: " + convergedCentroids);
     System.out.println("=======================");
 
-    // readCentroids(conf, new Path(otherArgs[4]));
   }
 }
-
-
-
-/**
- *  -- Gestione comandi hadoop --
- * */
-
-// mvn clean package
-// hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans data.txt 7 3 0.5 centroids.txt output
-// cat /opt/yarn/logs/
-// hadoop fs -cat output/part* | head
-
-
-//THRESHOLD 0.0001
-//test point n = 1.000
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-1k.txt 7 3 0.0001 centroids.txt output 
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-1k.txt 13 3 0.0001 centroids.txt output 
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-1k.txt 7 7 0.0001 centroids.txt output 
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-1k.txt 13 7 0.0001 centroids.txt output 
-
-//test point n = 10.000
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-10k.txt 7 3 0.0001 centroids.txt output 
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-10k.txt 13 3 0.0001 centroids.txt output 
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-10k.txt 7 7 0.0001 centroids.txt output 
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-10k.txt 13 7 0.0001 centroids.txt output 
-
-
-//test point n = 100.000
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-100k.txt 7 3 0.0001 centroids.txt output
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-100k.txt 13 3 0.0001 centroids.txt output 
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-100k.txt 7 7 0.0001 centroids.txt output 
-//hadoop jar target/kmeans-1.0-SNAPSHOT.jar it.unipi.hadoop.Kmeans points-100k.txt 13 7 0.0001 centroids.txt output 
