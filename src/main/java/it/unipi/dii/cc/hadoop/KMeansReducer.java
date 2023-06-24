@@ -15,8 +15,8 @@ import org.apache.hadoop.io.SequenceFile;
 
 public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text>
 {
-    private Text result = new Text("");
     private static int dimension;
+    private Text result = new Text("");
     private static double threshold;
     private final List<Centroid> centroids = new ArrayList<Centroid>();
     public static enum Counter {
@@ -31,17 +31,13 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text>
         dimension = Integer.parseInt(conf.get("dimension"));
         threshold = Double.parseDouble(conf.get("threshold"));
     }
-/*
-    Centroide0: Punto1, Punto2, Punto5
-    Centroide1: Punto0, Punto3
-    Centroide2: Punto4, Punto6
-*/
+
     @Override
     public void reduce(Centroid key, Iterable<Point> values, Context context) throws IOException, InterruptedException
     {
       Centroid meanCentroid = new Centroid(dimension);
       long numElements = 0;
-      
+
       for (Point currentPoint : values)
       {
         meanCentroid.add(currentPoint);
@@ -51,11 +47,9 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text>
       meanCentroid.setId(key.getId());
       meanCentroid.calculateMean(numElements);
 
-      centroids.add(meanCentroid.copy());
-
       Double distance = key.findEuclideanDistance((Point) meanCentroid);
 
-      result.set(meanCentroid.toString() + " - " + key.toString() + " - Distance: " + distance);
+      result.set(meanCentroid.toString());
       context.write(null, result);
 
       if (distance <= threshold)
@@ -63,34 +57,4 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text>
         context.getCounter(Counter.CONVERGED_COUNT).increment(1);
       }
     }
-
-    /*
-
-    @Override
-    protected void cleanup(Context context) throws IOException, InterruptedException
-    {
-      super.cleanup(context);
-
-      Configuration conf = context.getConfiguration();
-      Path centersPath = new Path(conf.get("centroidsFilename"));
-      FileSystem fs = FileSystem.get(conf);
-
-      if (fs.exists(centersPath)) {
-        System.out.println("Delete old output folder: " + centersPath.toString());
-        fs.delete(centersPath, true);
-      }
-
-      SequenceFile.Writer centroidWriter = SequenceFile.createWriter(conf,
-          SequenceFile.Writer.file(centersPath),
-          SequenceFile.Writer.keyClass(IntWritable.class),
-          SequenceFile.Writer.valueClass(Centroid.class));
-     
-      for (Centroid c : centroids)
-        centroidWriter.append(c.getId(), c);
-
-
-      centroidWriter.close();
-    }
-
-     */
   }
