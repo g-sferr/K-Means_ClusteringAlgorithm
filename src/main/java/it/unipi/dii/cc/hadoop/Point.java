@@ -71,10 +71,13 @@ public class Point implements WritableComparable<Centroid>
   @Override
   public String toString()
   {
+    int count = 0;
     String elements = "";
     for (final DoubleWritable element : this.coordinates)
-        elements += element.get() + ";";
-
+    {
+      elements += element.get() + (count < (this.coordinates.size() - 1) ? "," : "");
+      count++;
+    }
     return elements;
   }
 
