@@ -31,19 +31,16 @@ public class Kmeans
 {
 
   // Recupera dai file di iterazione i centroidi restituiti dal reducer dell'iterazione precedente
-  private static List<Centroid> recoverResults(int K, String OUT_FILE, Configuration conf) throws IOException
+  private static List<Centroid> retrieveResults(int K, String OUT_FILE, Configuration conf) throws IOException
   {
     List<Centroid> toReturn = new ArrayList<>();
 
     Path path = new Path(OUT_FILE);
     FileSystem hdfs = FileSystem.get(conf);
 
-    FileStatus[] status = hdfs.listStatus(path);
-
-    String centroidString = "";
-    String line;
-
     // status contiene una lista con tutti i file nella cartella /iteration-X
+    FileStatus[] status = hdfs.listStatus(path);
+    String line;
 
     // Check _SUCCESS
     if (!status[0].getPath().getName().startsWith("_SUCCESS"))
@@ -60,15 +57,13 @@ public class Kmeans
       {
         while ((line = reader.readLine()) != null)
         {
-          centroidString += line.split("\t")[1] + ";";
+          String[] splittedCentroid = line.split(";");
+          toReturn.add( new Centroid(splittedCentroid[1],
+                                      Integer.parseInt(Config.DIMENSIONS),
+                                      Integer.parseInt(splittedCentroid[0])) );
         }
       }
     }
-    String[] centroidList = centroidString.split(";");
-
-    for (int j = 0; j < K; j++)
-      toReturn.add(new Centroid(Integer.parseInt(centroidList[j])));
-
     return toReturn;
   }
 
@@ -80,7 +75,7 @@ public class Kmeans
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
     List<Centroid> newCentroids;
-    List<Centroid> oldCentroids = null;
+    List<Centroid> oldCentroids = new ArrayList<>();
 
 
     if (otherArgs.length < 2)
@@ -150,14 +145,7 @@ public class Kmeans
       System.out.println("    ITERATION:    " + (iterations));
       System.out.println("    CONVERGED CENTROIDS:    " + convergedCentroids);
       System.out.println("=======================");
-/*
-      if (fs.exists(iterationOutputPath)) {
-        System.out.println("=======================");
-        System.out.println("DELETE OLD OUTPUT FOLDER: " + output.toString());
-        System.out.println("=======================");
-        fs.delete(output, true);
-      }
-*/
+
       Job job = Job.getInstance(conf, "Kmeans Job " + (iterations));
 
       //job.getConfiguration().set("centroidsFilename", otherArgs[4]);
@@ -169,10 +157,10 @@ public class Kmeans
       job.setMapperClass(KMeansMapper.class);
       job.setReducerClass(KMeansReducer.class);
 
+      //job.setCombinerClass(KMeansReducer.class);
 
       /**** _Gestione numerosità task Reducer_ *** */
       int K = Integer.parseInt(Config.K); //Parametro passato contenente il valore dei k cluster scelti
-      //job.setCombinerClass(KMeansReducer.class); //Controllare se ha a che fare con il set dei task sotto
       job.setNumReduceTasks(K); // Un reducer per ogni cluster
 
       job.setMapOutputKeyClass(Centroid.class);
@@ -196,7 +184,7 @@ public class Kmeans
         oldCentroids.add(c.copy());
 
       // Dopodiche recupero newCenters dal file risultato dell'iterazione corrente
-      newCentroids = recoverResults(K, iterationOutputPath, conf);
+      newCentroids = retrieveResults(K, iterationOutputPath, conf);
 
       convergedCentroids = job.getCounters().findCounter(KMeansReducer.Counter.CONVERGED_COUNT).getValue();
 
