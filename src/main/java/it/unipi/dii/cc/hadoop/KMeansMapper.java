@@ -2,18 +2,15 @@ package it.unipi.dii.cc.hadoop;
 
 import java.util.StringTokenizer;
 
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Mapper;
 import java.util.List;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
 
-public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
+public class KMeansMapper extends Mapper<LongWritable, Text, IntWritable, Point> {
   private final List<Centroid> centroids = new ArrayList<>();
   private Text word = new Text();
   private int configurationDimension;
@@ -29,12 +26,14 @@ public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
       for(int i = 0; i < k; i++) // es: 0;0.1,0.2
       {
           String[] splittedCentroid = conf.get("centroid_" + i).split(";");
-          centroids.add( new Centroid(splittedCentroid[1], configurationDimension, Integer.parseInt(splittedCentroid[0])) );
+          centroids.add( new Centroid(splittedCentroid[1], configurationDimension,
+                                        Integer.parseInt(splittedCentroid[0])) );
       }
   }
 
   @Override
-  public void map(Object key, Text value, Context context) throws IOException, InterruptedException
+  public void map(LongWritable key, Text value, Context context) throws IOException,
+                                                                InterruptedException
   {
 
     Point point = new Point(value.toString(), configurationDimension);
@@ -52,6 +51,6 @@ public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
         closestCentroid = c1.copy();
       }
     }
-    context.write(closestCentroid, point);
+    context.write(closestCentroid.getId(), point);
   }
 }
