@@ -1,12 +1,11 @@
 package it.unipi.dii.cc.hadoop;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.StringTokenizer;
 import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
@@ -29,9 +28,30 @@ import java.util.List;
 
 public class Kmeans
 {
+  private static boolean checkConditions(List <Centroid> newCentroids, List <Centroid> oldCentroids,
+                                        int K, double EPS, int MAX_ITER, int iterations)
+  {
+    double distance;
+
+    // Controllo se ho raggiunto il massimo numero di iterazioni
+    if (iterations >= MAX_ITER) return true;
+
+    //  Per ogni cluster, comparo i vecchi e i nuovi centroidi
+    for (int i = 0; i < K; i++)
+    {
+      distance = newCentroids.get(i).findEuclideanDistance(oldCentroids.get(i));
+      // Se uno dei centroidi differisce dal vecchio di piu di EPS non mi fermo
+      if(distance > EPS)
+        return false;
+    }
+
+    // Se in tutte le coordinate la variazione e' sotto la epsilon, allora e' tempo di fermarsi
+    return true;
+  }
 
   // Recupera dai file di iterazione i centroidi restituiti dal reducer dell'iterazione precedente
-  private static List<Centroid> retrieveResults(int K, String OUT_FILE, Configuration conf) throws IOException
+  private static List<Centroid> retrieveResults(String OUT_FILE,
+                                                Configuration conf) throws IOException
   {
     List<Centroid> toReturn = new ArrayList<>();
 
@@ -57,7 +77,7 @@ public class Kmeans
       {
         while ((line = reader.readLine()) != null)
         {
-          String[] splittedCentroid = line.split(";");
+          String[] splittedCentroid = line.split("\t");
           toReturn.add( new Centroid(splittedCentroid[1],
                                       Integer.parseInt(Config.DIMENSIONS),
                                       Integer.parseInt(splittedCentroid[0])) );
@@ -67,10 +87,26 @@ public class Kmeans
     return toReturn;
   }
 
+  private static void writeCentroids(Configuration conf, List <Centroid> centroids,
+                                          String output) throws IOException
+  {
+    FileSystem hdfs = FileSystem.get(conf);
+    FSDataOutputStream outstream = hdfs.create(new Path(output), true);
+    BufferedWriter br = new BufferedWriter(new OutputStreamWriter(outstream));
+
+    // Write centroid
+    for(Centroid c : centroids)
+    {
+      br.write(c.getId().get() + "\t" + (new Point(c.getCoordinates())).toString());
+      br.newLine();
+    }
+
+    br.close();
+    hdfs.close();
+  }
+
   public static void main(String[] args) throws Exception
   {
-    //System.out.println();
-
     Configuration conf = new Configuration();
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
@@ -100,10 +136,15 @@ public class Kmeans
 
 
     long start = System.currentTimeMillis();
+    String OUTPUT_FILE = otherArgs[1];
+
 
     // Elezione di punti casuali a Centroidi
     newCentroids = Centroid.randomCentroidGenerator(otherArgs[0],
                               Config.K, Config.DIMENSIONS, conf);
+
+    // Li metto in un file per confrontarli successivamente con i finali
+    //writeCentroids(conf, newCentroids, OUTPUT_FILE+"/initialRand_Centroids.txt");
 
     Path output = new Path(otherArgs[1]);
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -118,28 +159,25 @@ public class Kmeans
     System.out.println("FIRST CENTROIDS");
     System.out.println("=======================");
 
-    long convergedCentroids = 0;
-    long iterations = 0;
+    boolean stop = false;
     boolean succeded = true; // Per controllare se il job è terminato correttamente
+    long convergedCentroids = 0;
+    int iterations = 0;
 
     String iterationOutputPath = "";
-    String OUTPUT_FILE = otherArgs[1];
 
     conf.set("k", Config.K);
     conf.set("threshold", Config.THRESHOLD);
     conf.set("dimension", Config.DIMENSIONS);
 
-    while ((convergedCentroids < Integer.parseInt(Config.K)) &&
-            (iterations < Integer.parseInt(Config.MAX_ITER)))
+    while (!stop)
     {
       iterations++;
       iterationOutputPath = OUTPUT_FILE + "/iteration-" + iterations;
 
-
       // Passo i centroidi ai mapper
       for ( Centroid c : newCentroids)
         conf.set("centroid_" + c.getId().toString(), c.toString());
-
 
       System.out.println("=======================");
       System.out.println("    ITERATION:    " + (iterations));
@@ -148,25 +186,20 @@ public class Kmeans
 
       Job job = Job.getInstance(conf, "Kmeans Job " + (iterations));
 
-      //job.getConfiguration().set("centroidsFilename", otherArgs[4]);
-
       job.setInputFormatClass(TextInputFormat.class);
       job.setOutputFormatClass(TextOutputFormat.class);
 
       job.setJarByClass(Kmeans.class);
       job.setMapperClass(KMeansMapper.class);
+      job.setCombinerClass(KMeansReducer.class);
       job.setReducerClass(KMeansReducer.class);
-
-      //job.setCombinerClass(KMeansReducer.class);
 
       /**** _Gestione numerosità task Reducer_ *** */
       int K = Integer.parseInt(Config.K); //Parametro passato contenente il valore dei k cluster scelti
       job.setNumReduceTasks(K); // Un reducer per ogni cluster
 
-      job.setMapOutputKeyClass(Centroid.class);
-      job.setMapOutputValueClass(Point.class);
-      job.setOutputKeyClass(Text.class);
-      job.setOutputValueClass(Text.class);
+      job.setOutputKeyClass(IntWritable.class);
+      job.setOutputValueClass(Point.class);
 
       FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
       FileOutputFormat.setOutputPath(job, new Path(iterationOutputPath));
@@ -179,16 +212,21 @@ public class Kmeans
         System.exit(2);
       }
 
-      // Sposto newCentroids in oldCenters
+      // Sposto newCentroids in oldCentroids
       for ( Centroid c : newCentroids)
         oldCentroids.add(c.copy());
 
       // Dopodiche recupero newCenters dal file risultato dell'iterazione corrente
-      newCentroids = retrieveResults(K, iterationOutputPath, conf);
 
-      convergedCentroids = job.getCounters().findCounter(KMeansReducer.Counter.CONVERGED_COUNT).getValue();
+      newCentroids = retrieveResults(iterationOutputPath, conf);
+
+      stop = checkConditions(newCentroids, oldCentroids, K,
+                            Double.parseDouble(Config.THRESHOLD),
+                            Integer.parseInt(Config.MAX_ITER), iterations);
 
     }
+
+    writeCentroids(conf, newCentroids, OUTPUT_FILE+"/finalCentroids.txt");
 
     long end = System.currentTimeMillis();
     long elapsedTime = end - start;
