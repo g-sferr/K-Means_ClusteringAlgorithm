@@ -13,7 +13,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 
 
-public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text>
+public class KMeansReducer extends Reducer<IntWritable, Point, IntWritable, Point>
 {
     private static int dimension;
     private Text result = new Text("");
@@ -33,7 +33,8 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text>
     }
 
     @Override
-    public void reduce(Centroid key, Iterable<Point> values, Context context) throws IOException, InterruptedException
+    public void reduce(IntWritable key, Iterable<Point> values,
+                       Context context) throws IOException, InterruptedException
     {
       Centroid meanCentroid = new Centroid(dimension);
       long numElements = 0;
@@ -44,17 +45,19 @@ public class KMeansReducer extends Reducer<Centroid, Point, NullWritable, Text>
         numElements++;
       }
 
-      meanCentroid.setId(key.getId());
+      meanCentroid.setId(key);
       meanCentroid.calculateMean(numElements);
 
-      Double distance = key.findEuclideanDistance((Point) meanCentroid);
+      //Double distance = key.findEuclideanDistance((Point) meanCentroid)
+      Point point = new Point(meanCentroid.getCoordinates());
+      //result.set(point);
+      context.write(key, point);
 
-      result.set(meanCentroid.toString());
-      context.write(null, result);
-
+      /*
       if (distance <= threshold)
       {
         context.getCounter(Counter.CONVERGED_COUNT).increment(1);
       }
+       */
     }
   }
