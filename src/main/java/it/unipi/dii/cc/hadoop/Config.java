@@ -16,11 +16,7 @@ public class Config
         Properties prop = new Properties();
         try
         {
-            String configFilePath = "config.properties";
-            FileInputStream propsInput = new FileInputStream(configFilePath);
-
-            prop.load(propsInput);
-
+            prop.load(new FileInputStream("config.properties"));
         } catch (IOException e) {
             e.printStackTrace();
         }
