@@ -28,10 +28,12 @@ import java.util.List;
 
 public class Kmeans
 {
+  private static int convergedCentroids = 0;
   private static boolean checkConditions(List <Centroid> newCentroids, List <Centroid> oldCentroids,
                                         int K, double EPS, int MAX_ITER, int iterations)
   {
     double distance;
+    convergedCentroids = 0;
 
     // Controllo se ho raggiunto il massimo numero di iterazioni
     if (iterations >= MAX_ITER) return true;
@@ -43,6 +45,8 @@ public class Kmeans
       // Se uno dei centroidi differisce dal vecchio di piu di EPS non mi fermo
       if(distance > EPS)
         return false;
+      else
+        convergedCentroids++;
     }
 
     // Se in tutte le coordinate la variazione e' sotto la epsilon, allora e' tempo di fermarsi
@@ -111,7 +115,7 @@ public class Kmeans
     String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
     List<Centroid> newCentroids;
-    List<Centroid> oldCentroids = new ArrayList<>();
+
 
 
     if (otherArgs.length < 2)
@@ -143,8 +147,6 @@ public class Kmeans
     newCentroids = Centroid.randomCentroidGenerator(otherArgs[0],
                               Config.K, Config.DIMENSIONS, conf);
 
-    // Li metto in un file per confrontarli successivamente con i finali
-    //writeCentroids(conf, newCentroids, OUTPUT_FILE+"/initialRand_Centroids.txt");
 
     Path output = new Path(otherArgs[1]);
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -155,13 +157,15 @@ public class Kmeans
       fs.delete(output, true);
     }
 
+    // Li metto in un file per confrontarli successivamente con i finali
+    writeCentroids(conf, newCentroids, OUTPUT_FILE+"/initialRand_Centroids.txt");
+
     System.out.println("=======================");
     System.out.println("FIRST CENTROIDS");
     System.out.println("=======================");
 
     boolean stop = false;
     boolean succeded = true; // Per controllare se il job è terminato correttamente
-    long convergedCentroids = 0;
     int iterations = 0;
 
     String iterationOutputPath = "";
@@ -172,6 +176,8 @@ public class Kmeans
 
     while (!stop)
     {
+      List<Centroid> oldCentroids = new ArrayList<>();
+
       iterations++;
       iterationOutputPath = OUTPUT_FILE + "/iteration-" + iterations;
 
