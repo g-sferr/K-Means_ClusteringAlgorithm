@@ -117,20 +117,24 @@ public class Centroid extends Point
       Double centroidCoordinate = this.getCoordinates().get(i).get();
       Double mean = centroidCoordinate / numElements;
 
-      mean = (double) Math.round(mean * 1000000d) / 1000000d; // FRA: Frare prova con e senza questa approssimazione
+      // FRA: Frare prova con e senza questa approssimazione
+      mean = (double) Math.round(mean * 1000000d) / 1000000d;
       this.getCoordinates().set(i, new DoubleWritable(mean));
     }
   }
 
-  public static List<Centroid> randomCentroidGenerator( String INPUT_FILE, String k,
-                                              String DIM, Configuration conf) throws IOException
+  public static List<Centroid> randomCentroidGenerator( String INPUT_FILE,
+                                                        String k, String DIM,
+                                                        Configuration conf)
+                                                        throws IOException
   {
     final int numCentroid = Integer.parseInt(k);
     final int dimension = Integer.parseInt(DIM);
     final List<Centroid> randomCentroidsList = new ArrayList<>();
 
     Random random = new Random();
-    List<Integer> indexRandomCentroid = new ArrayList<>(); // Lista contenente 'numCentroid' numeri casuali univoci
+    //Lista contenente 'numCentroid' numeri casuali univoci
+    List<Integer> indexRandomCentroid = new ArrayList<>();
 
     int pick;
     int dataSetSize = getLineNumber(INPUT_FILE, conf);
@@ -149,9 +153,11 @@ public class Centroid extends Point
     int ID = 0;
     String line;
 
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(hdfs.open(path))))
+    try (BufferedReader reader = new
+            BufferedReader(new InputStreamReader(hdfs.open(path))))
     {
-      while( ((line = reader.readLine()) != null) && (randomCentroidsList.size() < numCentroid) )
+      while(((line = reader.readLine()) != null) &&
+              (randomCentroidsList.size() < numCentroid) )
       {
         if (indexRandomCentroid.contains(currentLine))
         {
@@ -172,7 +178,8 @@ public class Centroid extends Point
     Path path = new Path(INPUT_FILE);
     int count = 0;
 
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(path))))
+    try (BufferedReader reader = new BufferedReader(new
+                                    InputStreamReader(fs.open(path))))
     {
       while (reader.readLine() != null)
       {
