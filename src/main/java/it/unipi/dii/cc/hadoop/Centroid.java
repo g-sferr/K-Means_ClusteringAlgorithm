@@ -66,12 +66,6 @@ public class Centroid extends Point
     return this.getId().get() + ";" + super.toString();
   }
 
-  @Override
-  public int compareTo(Centroid otherCentroid)
-  {
-    return Integer.compare(this.getId().get(), otherCentroid.getId().get());
-  }
-
   // Make a deep copy of the centroid 
   public Centroid copy()
   {
