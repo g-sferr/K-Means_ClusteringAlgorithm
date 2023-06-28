@@ -70,8 +70,6 @@ hadoop jar target/KMeans-1.0-SNAPSHOT.jar it.unipi.dii.cc.hadoop.Kmeans points_s
 
 ## Authors
 
-[@francescoB1997](https://github.com/francescoB1997), [@g-sferr](https://github.com/g-sferr), [@leobargiotti](https://github.com/leobargiotti)
-
-* Francesco Bruno, f.bruno10@studenti.unipi.it
-* Gaetano Sferrazza, g.sferrazza@studenti.unipi.it
-* Leonardo Bargiotti, l.bargiotti@studenti.unipi.it
+* Francesco Bruno, f.bruno10@studenti.unipi.it - [@francescoB1997](https://github.com/francescoB1997)
+* Gaetano Sferrazza, g.sferrazza@studenti.unipi.it - [@g-sferr](https://github.com/g-sferr)
+* Leonardo Bargiotti, l.bargiotti@studenti.unipi.it - [@leobargiotti](https://github.com/leobargiotti)
