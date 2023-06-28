@@ -5,7 +5,7 @@ Cloud Computing Project
 
 ## Description
 
-![Image of case_stady](case_study_description.PNG)
+![Image of Yaktocat](case_study_description.PNG)
 
 
 ## Quick Start
