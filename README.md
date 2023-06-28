@@ -56,6 +56,12 @@ Output Expected:
     Starting nodemanagers
 ```
 
+#### Locate in the folder where the project was uploaded
+
+```shell
+cd /KMeans
+```
+
 #### Clean and make new maven package. Run it with the pom.xml is
 
 ```shell
