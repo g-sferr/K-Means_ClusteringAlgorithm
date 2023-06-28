@@ -1,12 +1,11 @@
 
 # The 𝑘-means Clustering Algorithm in MapReduce
 
-Cloud Computing Project
+####Cloud Computing Project
 
 ## Case Study Description
 
 ![Image of Description](images/case_study_description.png)
-
 
 ## What we are required to do
 
@@ -28,7 +27,7 @@ More deteails and final results are presents in the [Final Report Documentation]
 
 ## Quick Start
 
-#### Login as hadoop user and go out of the root with "cd" command line after execute below command
+#### Login as hadoop user and go out of the root folder with "cd" command line after execute below command
 
 ```shell
 sudo su -- hadoop
