@@ -62,7 +62,7 @@ Output Expected:
 mvn clean package
 ```
 
-#### Hadoop runable - java code kmeans [input_fileDataset_name] [output_folder_name]
+#### Hadoop runable - java code Kmeans [input_fileDataset_name] [output_folder_name]
 
 ```shell
 hadoop jar target/KMeans-1.0-SNAPSHOT.jar it.unipi.dii.cc.hadoop.Kmeans points_set_1k.txt output_kmeans_1k
