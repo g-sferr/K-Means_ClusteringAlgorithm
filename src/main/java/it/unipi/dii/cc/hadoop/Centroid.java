@@ -205,7 +205,7 @@ public class Centroid extends Point
    * - N.B.: With this configuration of the while(), the file to be passed must
    * have as many rows as there are clusters to associate centroids with
    */
-  public static List<Centroid> staticCentroidGenerator (String STATIC_CENTROID_FILE,
+  public static List<Centroid> staticCentroidLoader (String STATIC_CENTROID_FILE,
                                                          String DIM,
                                                          Configuration conf)
                                                          throws IOException
