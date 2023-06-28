@@ -5,9 +5,8 @@ Cloud Computing Project
 
 ## Description
 
-**The 𝑘-means Clustering Algorithm** is the simply version of the one of the most well-known and widely used clustering algorithms is Lloyd’s algorithm.
+![Image of case_stady](case_study_description.PNG)
 
-- More details will come soon.
 
 ## Quick Start
 
