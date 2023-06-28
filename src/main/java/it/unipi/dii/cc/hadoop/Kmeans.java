@@ -156,7 +156,7 @@ public class Kmeans
 
     // Generate initial k random centroids
     newCentroids = Centroid.randomCentroidGenerator(otherArgs[0], Config.K, Config.DIMENSIONS, conf);
-    //newCentroids = Centroid.staticCentroidGenerator ("static_centroids.txt", Config.DIMENSIONS, conf);
+    //newCentroids = Centroid.staticCentroidLoader ("static_centroids.txt", Config.DIMENSIONS, conf);
 
     Path output = new Path(otherArgs[1]);
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -250,13 +250,20 @@ public class Kmeans
     long minutes = (elapsedTime / 1000) / 60;
     long seconds = (elapsedTime / 1000) % 60;
 
-    // Write final information into info.txt
+    // Write final information into info_results.txt
     String[] infos = {
+            "\n --- With respect to the following parameter configuration:",
+            "\n=======================",
+            "Cluster (K): " + Config.K,
+            "Dimension: " + Config.DIMENSIONS,
+            "Threshold: " + Config.THRESHOLD,
+            "Max_Iterations: " + Config.MAX_ITER,
+            "=======================",
             "\n1)  Total Execution Time: " + minutes + " min " + seconds + " sec",
             "2)  Total Iterations: " + iterations,
             "3)  Number of Converged Centroids: " + convergedCentroids + "\n"
     };
-    writeInfo(conf, infos, OUTPUT_FILE+"/info.txt");
+    writeInfo(conf, infos, OUTPUT_FILE+"/info_results.txt");
 
     // print final information
     System.out.println("\n=======================");
