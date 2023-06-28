@@ -250,7 +250,6 @@ public class Kmeans
     long minutes = (elapsedTime / 1000) / 60;
     long seconds = (elapsedTime / 1000) % 60;
 
-    // Write final information into info_results.txt
     String[] infos = {
             "\n  <<< With respect to the following parameter configuration >>>",
             "\t\t===============================",
