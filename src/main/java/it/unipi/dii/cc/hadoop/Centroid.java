@@ -35,12 +35,15 @@ public class Centroid extends Point
   @Override
   public String toString() { return this.getId().get() + ";" + super.toString();}
 
-  @Override
-  public int compareTo(Centroid otherCentroid) {return Integer.compare(this.getId().get(), otherCentroid.getId().get());}
-
   /*
   Constructors
   */
+
+  Centroid() {
+    super();
+
+    this.id = new IntWritable(-1);
+  }
 
   Centroid(int n)
   {
