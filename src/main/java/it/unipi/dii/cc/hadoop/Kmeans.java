@@ -105,6 +105,24 @@ public class Kmeans
     hdfs.close();
   }
 
+  /**
+   * Methods to write execution info (printInfo) into file (outputFile)
+   */
+  private static void writeInfo(Configuration conf, String[] printInfo, String outputFile) throws IOException
+  {
+    FileSystem hdfs = FileSystem.get(conf);
+    BufferedWriter br = new BufferedWriter(new OutputStreamWriter(hdfs.create(new Path(outputFile), true)));
+
+    for(String s : printInfo)
+    {
+      br.write(s);
+      br.newLine();
+    }
+
+    br.close();
+    hdfs.close();
+  }
+
   public static void main(String[] args) throws Exception
   {
     Configuration conf = new Configuration();
@@ -112,27 +130,26 @@ public class Kmeans
 
     List<Centroid> newCentroids;
 
-
     if (otherArgs.length < 2)
     {
       System.out.println("=======================");
-      System.err.println("Usage: kmeans <input> <output>");
+      System.err.println("Usage: kmeans <input_file_name> <output_folder_name>");
       System.out.println("=======================");
       System.exit(2);
     }
 
     // Parameters taken from configuration file and command line
+    System.out.println("\n\n=======================");
+    System.out.println("args[0]: <input_file> = " + otherArgs[0]);
     System.out.println("=======================");
-    System.out.println("args[0]: <input>=" + otherArgs[0]);
+    System.out.println("args[1]: <output_folder> = " + otherArgs[1]);
     System.out.println("=======================");
-    System.out.println("args[1]: <k>=" + Config.K);
+    System.out.println("K: " + Config.K);
     System.out.println("=======================");
-    System.out.println("args[2]: <dimension>=" + Config.DIMENSIONS);
+    System.out.println("Dimension: " + Config.DIMENSIONS);
     System.out.println("=======================");
-    System.out.println("args[3]: <threshold>=" + Config.THRESHOLD);
-    System.out.println("=======================");
-    System.out.println("args[5]: <output>=" + otherArgs[1]);
-    System.out.println("=======================");
+    System.out.println("Threshold: " + Config.THRESHOLD);
+    System.out.println("=======================\n\n");
 
 
     long start = System.currentTimeMillis();
@@ -141,6 +158,7 @@ public class Kmeans
 
     // Generate initial k random centroids
     newCentroids = Centroid.randomCentroidGenerator(otherArgs[0], Config.K, Config.DIMENSIONS, conf);
+	//newCentroids = Centroid.staticCentroidGenerator ("static_centroids.txt", Config.DIMENSIONS, conf);
 
     Path output = new Path(otherArgs[1]);
     FileSystem fs = FileSystem.get(output.toUri(), conf);
@@ -155,9 +173,9 @@ public class Kmeans
     // Writes initial centroids into a file
     writeCentroids(conf, newCentroids, OUTPUT_FILE+"/initialRand_Centroids.txt");
 
-    System.out.println("=======================");
-    System.out.println("FIRST CENTROIDS");
-    System.out.println("=======================");
+    System.out.println("\n\n\n===============================================");
+    System.out.println("\n    ***** K-MEANS ALGORITHM STARTED *****\n");
+    System.out.println("===============================================\n\n");
 
     boolean stop = false;
     boolean succeded; // Boolean value to check status of execution
@@ -177,15 +195,14 @@ public class Kmeans
       iterationOutputPath = OUTPUT_FILE + "/iteration-" + iterations;
 
       // Pass centroids to mapper
-      //newCentroids.forEach(c -> conf.set("centroid_" + c.getId().toString(), c.toString()));
+      newCentroids.forEach(c -> conf.set("centroid_" + c.getId().toString(), c.toString()));
 
-      for ( Centroid c : newCentroids)
-        conf.set("centroid_" + c.getId().toString(), c.toString());
-
-      System.out.println("=======================");
+      System.out.println("\n=======================");
       System.out.println("    ITERATION:    " + (iterations));
-      System.out.println("    CONVERGED CENTROIDS:    " + convergedCentroids);
-      System.out.println("=======================");
+      System.out.println("    CONVERGED CENTROIDS:  " + convergedCentroids + "/" + Config.K);
+	  System.out.println("=======================");
+	  System.out.println("    CURRENT CENTROIDS:   " + newCentroids);
+      System.out.println("=======================\n");
 
       Job job = Job.getInstance(conf, "Kmeans Job " + (iterations));
       job.setJarByClass(Kmeans.class);
@@ -211,17 +228,16 @@ public class Kmeans
       FileOutputFormat.setOutputPath(job, new Path(iterationOutputPath));
 
       succeded = job.waitForCompletion(true);
-      // if(!job.waitForCompletion(true))
       if(!succeded) // check if job finished successfully or not
       {
         System.err.println("Error at iteration "+iterations);
         System.exit(2);
       }
+	  
+
 
       // move newCentroids to oldCentroids
-      // newCentroids.forEach(c ->  oldCentroids.add(c.copy()));
-      for ( Centroid c : newCentroids)
-        oldCentroids.add(c.copy());
+      newCentroids.forEach(c ->  oldCentroids.add(c.copy()));
 
 
       // retrieve new Centers from the current interaction result file
@@ -235,23 +251,28 @@ public class Kmeans
     // Write final centroids into finalCentroids.txt
     writeCentroids(conf, newCentroids, OUTPUT_FILE+"/finalCentroids.txt");
 
-    // Write final information into info.txt ???
-
     long end = System.currentTimeMillis();
     long elapsedTime = end - start;
     long minutes = (elapsedTime / 1000) / 60;
     long seconds = (elapsedTime / 1000) % 60;
 
-    // print final information
-    System.out.println("=======================");
-    System.out.println(" TOTAL TIME " + minutes + " m " + seconds + "s");
-    // System.out.println("=======================");
-    // System.out.println("::FINAL CENTROIDS::");
-    System.out.println("=======================");
-    System.out.println("::NUMBER OF ITERATIONS:: " + iterations);
-    System.out.println("=======================");
-    System.out.println("::NUMBER OF CONVERGED COUNT:: " + convergedCentroids);
-    System.out.println("=======================");
+    // Write final information into info.txt
+    String[] infos = {
+            "\n1)  Total Execution Time: " + minutes + " min " + seconds + " sec",
+            "2)  Total Iterations: " + iterations,
+            "3)  Number of Converged Centroids: " + convergedCentroids + "\n"
+    };
+    writeInfo(conf, infos, OUTPUT_FILE+"/info.txt");
 
+    // print final information
+    System.out.println("\n=======================");
+    System.out.println("::TOTAL EXECUTION TIME:: " + minutes + " min " + seconds + " sec");
+    System.out.println("=======================");
+    System.out.println("::FINAL CENTROIDS::   " + newCentroids);
+    System.out.println("=======================");
+    System.out.println("::TOTAL ITERATIONS:: " + iterations);
+    System.out.println("=======================");
+    System.out.println("::NUMBER OF CONVERGED CENTROIDS:: " + convergedCentroids);
+    System.out.println("=======================\n");
   }
 }
