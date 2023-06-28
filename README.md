@@ -27,13 +27,13 @@ More deteails and final results are presents in the [Project Report Documentatio
 
 ## Quick Start
 
-#### Login as hadoop user and go out of the root folder with "cd" command after execute following command line
+#### Login as "hadoop user" and go out of the root folder with "cd" command after execute following command line
 
 ```shell
 sudo su -- hadoop
 ```
 
-#### From the name node start the name node, data nodes and secondary name node with following command
+#### From the name node start the "name node, data nodes and secondary name node" with following command
 
 ```shell
 start-dfs.sh
@@ -45,7 +45,7 @@ Output Expected:
     Starting secondary namenodes [hadoop-namenode]
 ```
 
-#### From the name node start the resource manager and node managers with following command
+#### From the name node start the "resource manager" and "node managers" with following command
 
 ```shell
 start-yarn.sh
@@ -56,7 +56,16 @@ Output Expected:
     Starting nodemanagers
 ```
 
-#### Locate in the folder where the project was uploaded
+#### Locate in the folder where the "dataset" was uploaded and load it on hadoop distributed file system (HDFS)
+
+```shell
+cd /KMeans/data
+```
+```shell
+hadoop fs -put points_set_1k.txt points_set_1k.txt
+```
+
+#### Locate in the folder where the "project" was uploaded
 
 ```shell
 cd /KMeans
