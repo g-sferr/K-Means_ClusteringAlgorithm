@@ -1,72 +1,50 @@
 package it.unipi.dii.cc.hadoop;
 
-import java.util.StringTokenizer;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Mapper;
 import java.util.List;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
 
-public class KMeansMapper extends Mapper<Object, Text, Centroid, Point> {
+public class KMeansMapper extends Mapper<LongWritable, Text, IntWritable, Point>
+{
   private final List<Centroid> centroids = new ArrayList<>();
-  private final static IntWritable one = new IntWritable(1);
-  private Text word = new Text();
-  private int configurationDimension;
-  private final Point point = new Point();
+  private int configurationDimension; // dimension: number of components
 
   @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
+  protected void setup(Context context)
+  {
       Configuration conf = context.getConfiguration();
-      Path centersPath = new Path(conf.get("centroidsFilename"));
-      SequenceFile.Reader reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(centersPath));
-      IntWritable key = new IntWritable();
-      Centroid value = new Centroid();
       configurationDimension = Integer.parseInt(conf.get("dimension"));
-      
-      while (reader.next(key, value)) {
-          Centroid c = new Centroid(key, value.getCoordinates());
+      int k = Integer.parseInt(conf.get("k"));
 
-          centroids.add(c);
+      for(int i = 0; i < k; i++)
+      {
+          String[] splittedCentroid = conf.get("centroid_" + i).split(";");  // es: 0;0.1,0.2
+          centroids.add( new Centroid(splittedCentroid[1], configurationDimension, Integer.parseInt(splittedCentroid[0])) );
       }
-
-      reader.close();
   }
 
+  // For each point passed in 'value', we map it to the closest centroid.
   @Override
-  public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-    StringTokenizer itr = new StringTokenizer(value.toString(), ",");
-    List<DoubleWritable> pointsList = new ArrayList<DoubleWritable>();
-    int count = 0;
+  public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
+  {
+    Point point = new Point(value.toString(), configurationDimension);
 
-    while (itr.hasMoreTokens()) {
-      word.set(itr.nextToken());
-      Double coordinate = Double.valueOf(word.toString());
-      pointsList.add(new DoubleWritable(coordinate));
-      count = count + 1;
-      
-
-      if (count == configurationDimension) {
-        break;
-      }
-    }
-    point.setCoordinates(pointsList);
-    Centroid closestCentroid = null;
+    Centroid closestCentroid = new Centroid();
     Double minimumDistance = Double.MAX_VALUE;
-    for (Centroid c1 : centroids) {
+
+    for (Centroid c1 : centroids) // we found the closest centroid to the passed point.
+    {
       Double distance = c1.findEuclideanDistance(point);
 
-      if (distance < minimumDistance) {
+      if (distance < minimumDistance)
+      {
         minimumDistance = distance;
-        closestCentroid = Centroid.copy(c1);
+        closestCentroid = c1.copy();
       }
     }
-
-    context.write(closestCentroid, point);
+    context.write(closestCentroid.getId(), point);
   }
-
 }
