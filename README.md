@@ -5,7 +5,7 @@
 
 ## Case Study Description
 
-![Image of Description](images/case_study_description.png)
+![Image of Description](various_folder_utils/images/case_study_description.png)
 
 ## What we are required to do
 
@@ -23,7 +23,7 @@
 
 ### Documentation Report
 
-More deteails and final results are presents in the [Final Report Documentation](/doc/doc_to_be_added.txt)
+More deteails and final results are presents in the [Final Report Documentation](various_folder_utils/doc/doc_to_be_added.txt)
 
 ## Quick Start
 
