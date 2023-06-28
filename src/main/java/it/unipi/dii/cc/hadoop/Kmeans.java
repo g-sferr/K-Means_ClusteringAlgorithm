@@ -234,7 +234,7 @@ public class Kmeans
       // move newCentroids to oldCentroids
       newCentroids.forEach(c ->  oldCentroids.add(c.copy()));
 
-      // retrieve new Centers from the current interaction result file
+      // retrieve new Centers from the previous iteration result file
       newCentroids = retrieveResults(iterationOutputPath, conf);
 
       stop = checkConditions(newCentroids, oldCentroids, K,
@@ -242,7 +242,7 @@ public class Kmeans
                             Integer.parseInt(Config.MAX_ITER), iterations);
 
     }
-    // Write final centroids into finalCentroids.txt
+    // Write final centroids into final_Centroids.txt
     writeCentroids(conf, newCentroids, OUTPUT_FILE+"/final_Centroids.txt");
 
     long end = System.currentTimeMillis();
