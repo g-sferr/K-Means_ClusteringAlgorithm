@@ -27,7 +27,7 @@ More deteails and final results are presents in the [Project Report Documentatio
 
 ## Quick Start
 
-#### Login as hadoop user and go out of the root folder with "cd" command line after execute below command
+#### Login as hadoop user and go out of the root folder with "cd" command after execute following command line
 
 ```shell
 sudo su -- hadoop
