@@ -1,7 +1,7 @@
 
 # The 𝑘-means Clustering Algorithm in MapReduce
 
-####Cloud Computing Project
+#### Cloud Computing Project
 
 ## Case Study Description
 
