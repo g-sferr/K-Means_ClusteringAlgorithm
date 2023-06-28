@@ -156,6 +156,7 @@ public class Kmeans
 
     // Generate initial k random centroids
     newCentroids = Centroid.randomCentroidGenerator(otherArgs[0], Config.K, Config.DIMENSIONS, conf);
+    // Generate initial k static centroids
     //newCentroids = Centroid.staticCentroidLoader ("static_centroids.txt", Config.DIMENSIONS, conf);
 
     Path output = new Path(otherArgs[1]);
@@ -199,8 +200,9 @@ public class Kmeans
       System.out.println("    ITERATION:    " + (iterations));
       System.out.println("    CONVERGED CENTROIDS:  " + convergedCentroids + "/" + Config.K);
       System.out.println("=======================");
-      System.out.println("    CURRENT CENTROIDS:   " + newCentroids);
-      System.out.println("=======================\n");
+      System.out.println("\n    CURRENT CENTROIDS:");
+      System.out.println("\n" + newCentroids);
+      System.out.println("\n=======================\n");
 
       Job job = Job.getInstance(conf, "Kmeans Job " + (iterations));
       job.setJarByClass(Kmeans.class);
@@ -268,10 +270,11 @@ public class Kmeans
 
     // print final information
     System.out.println("\n=======================");
-    System.out.println("::TOTAL EXECUTION TIME:: " + minutes + " min " + seconds + " sec");
+    System.out.println("::TOTAL EXECUTION TIME:: " + minutes + " min " + seconds + " sec" + " ("+((end - start)/1000)+" s)");
     System.out.println("=======================");
-    System.out.println("::FINAL CENTROIDS::   " + newCentroids);
-    System.out.println("=======================");
+    System.out.println("\n::FINAL CENTROIDS::");
+    System.out.println("\n" + newCentroids);
+    System.out.println("\n=======================");
     System.out.println("::TOTAL ITERATIONS:: " + iterations);
     System.out.println("=======================");
     System.out.println("::NUMBER OF CONVERGED CENTROIDS:: " + convergedCentroids);
