@@ -156,7 +156,7 @@ public class Kmeans
 
     // Generate initial k random centroids
     newCentroids = Centroid.randomCentroidGenerator(otherArgs[0], Config.K, Config.DIMENSIONS, conf);
-	//newCentroids = Centroid.staticCentroidGenerator ("static_centroids.txt", Config.DIMENSIONS, conf);
+    //newCentroids = Centroid.staticCentroidGenerator ("static_centroids.txt", Config.DIMENSIONS, conf);
 
     Path output = new Path(otherArgs[1]);
     FileSystem fs = FileSystem.get(output.toUri(), conf);
