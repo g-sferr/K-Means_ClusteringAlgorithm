@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.WritableComparable;
 
+
 public class Point implements WritableComparable<Point>
 {
   private List<DoubleWritable> coordinates;
@@ -30,7 +31,7 @@ public class Point implements WritableComparable<Point>
     this.coordinates = new ArrayList<>();
 
     for (final DoubleWritable element : coordinatesList)
-        this.coordinates.add(new DoubleWritable(element.get()));
+      this.coordinates.add(new DoubleWritable(element.get()));
   }
 
   // Create a new Point with the passed coordinates as splitted String by ','
@@ -38,21 +39,10 @@ public class Point implements WritableComparable<Point>
   {
     this.coordinates = new ArrayList<>();
     String[] splittedCoordinates = coordinatesReceived.split(",");
-    for(int i = 0; (i < splittedCoordinates.length) && (splittedCoordinates.length < configurationDimension); i++)
+    for(int i = 0; (i < splittedCoordinates.length) && (this.coordinates.size() < configurationDimension); i++)
     {
       coordinates.add(new DoubleWritable(Double.parseDouble(splittedCoordinates[i])));
     }
-
-    /* DA ELIMINARE
-    Text word = new Text();
-    StringTokenizer itr = new StringTokenizer(coordinatesReceived, ",");
-
-    while (itr.hasMoreTokens() && (coordinates.size() < configurationDimension))
-    {
-      word.set(itr.nextToken());
-      double coordinate = Double.parseDouble(word.toString());
-      coordinates.add(new DoubleWritable(coordinate));
-    }*/
   }
 
   @Override
@@ -61,7 +51,7 @@ public class Point implements WritableComparable<Point>
     out.writeInt(this.coordinates.size());
 
     for (final DoubleWritable value : this.coordinates)
-        out.writeDouble(value.get());
+      out.writeDouble(value.get());
   }
 
   @Override
@@ -71,7 +61,7 @@ public class Point implements WritableComparable<Point>
     this.coordinates = new ArrayList<>();
 
     for (int i = 0; i < size; i++)
-        this.coordinates.add(new DoubleWritable(in.readDouble()));
+      this.coordinates.add(new DoubleWritable(in.readDouble()));
   }
 
   @Override
