@@ -151,10 +151,8 @@ public class Kmeans
     System.out.println("Threshold: " + Config.THRESHOLD);
     System.out.println("=======================\n\n");
 
-
     long start = System.currentTimeMillis();
     String OUTPUT_FILE = otherArgs[1];
-
 
     // Generate initial k random centroids
     newCentroids = Centroid.randomCentroidGenerator(otherArgs[0], Config.K, Config.DIMENSIONS, conf);
@@ -171,7 +169,7 @@ public class Kmeans
     }
 
     // Writes initial centroids into a file
-    writeCentroids(conf, newCentroids, OUTPUT_FILE+"/initialRand_Centroids.txt");
+    writeCentroids(conf, newCentroids, OUTPUT_FILE+"/initial_rand_Centroids.txt");
 
     System.out.println("\n\n\n===============================================");
     System.out.println("\n    ***** K-MEANS ALGORITHM STARTED *****\n");
@@ -215,7 +213,6 @@ public class Kmeans
       job.setCombinerClass(KMeansReducer.class);
       job.setReducerClass(KMeansReducer.class);
 
-
       int K = Integer.parseInt(Config.K); // k parameter from configuration file
       job.setNumReduceTasks(K); // set the number of reducer to k
 
@@ -233,12 +230,9 @@ public class Kmeans
         System.err.println("Error at iteration "+iterations);
         System.exit(2);
       }
-	  
-
 
       // move newCentroids to oldCentroids
       newCentroids.forEach(c ->  oldCentroids.add(c.copy()));
-
 
       // retrieve new Centers from the current interaction result file
       newCentroids = retrieveResults(iterationOutputPath, conf);
@@ -249,7 +243,7 @@ public class Kmeans
 
     }
     // Write final centroids into finalCentroids.txt
-    writeCentroids(conf, newCentroids, OUTPUT_FILE+"/finalCentroids.txt");
+    writeCentroids(conf, newCentroids, OUTPUT_FILE+"/final_Centroids.txt");
 
     long end = System.currentTimeMillis();
     long elapsedTime = end - start;

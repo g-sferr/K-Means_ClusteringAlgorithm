@@ -198,7 +198,13 @@ public class Centroid extends Point
 
     return count;
   }
-  
+
+  /**
+   * Methods that returns a List of fixed Centroids static loaded
+   * from the file passed as argument.
+   * - N.B.: With this configuration of the while(), the file to be passed must
+   * have as many rows as there are clusters to associate centroids with
+   */
   public static List<Centroid> staticCentroidGenerator (String STATIC_CENTROID_FILE,
                                                          String DIM,
                                                          Configuration conf)
@@ -223,7 +229,6 @@ public class Centroid extends Point
         ID++;
       }
     }
-
     return staticCentroidsList;
   }
 }
