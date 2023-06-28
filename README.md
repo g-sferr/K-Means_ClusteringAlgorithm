@@ -56,16 +56,13 @@ Output Expected:
     Starting nodemanagers
 ```
 
-#### Locate in the folder where the "dataset" was uploaded and load it on hadoop distributed file system (HDFS)
+#### From the folder where the "dataset" was uploaded load it on hadoop distributed file system (HDFS)
 
 ```shell
-cd /KMeans/data
-```
-```shell
-hadoop fs -put points_set_1k.txt points_set_1k.txt
+hadoop fs -put /KMeans/data/points_set_1k.txt points_set_1k.txt
 ```
 
-#### Locate in the folder where the "project" was uploaded
+#### Locate in the main folder where the "project" was uploaded and where is present the pom.xml file
 
 ```shell
 cd /KMeans
@@ -77,7 +74,7 @@ cd /KMeans
 mvn clean package
 ```
 
-#### Hadoop runable - java code Kmeans [input_fileDataset_name] [output_folder_name]
+#### Hadoop runable - java code Kmeans [input_file-Dataset_name] [output_folder_name]
 
 ```shell
 hadoop jar target/KMeans-1.0-SNAPSHOT.jar it.unipi.dii.cc.hadoop.Kmeans points_set_1k.txt output_kmeans_1k
