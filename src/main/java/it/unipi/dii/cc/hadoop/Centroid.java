@@ -98,10 +98,9 @@ public class Centroid extends Point
    */
   public void add(Point currentPoint)
   {
-    int length = currentPoint.getCoordinates().size();
     List<DoubleWritable> currentPointCoordinates = currentPoint.getCoordinates();
 
-    for(int i = 0; i < length; i++)
+    for(int i = 0; i < currentPoint.getCoordinates().size(); i++)
     {
       Double centroidCoordinate = this.getCoordinates().get(i).get();
       Double currentPointCoordinate = currentPointCoordinates.get(i).get();
@@ -117,9 +116,7 @@ public class Centroid extends Point
    */
   public void calculateMean(long numberPoints)
   {
-    int length = this.getCoordinates().size();
-    
-    for(int i = 0; i < length; i++)
+    for(int i = 0; i < this.getCoordinates().size(); i++)
     {
       double centroidCoordinate = this.getCoordinates().get(i).get();
       double mean = centroidCoordinate / numberPoints;
@@ -200,5 +197,33 @@ public class Centroid extends Point
     fs.close();
 
     return count;
+  }
+  
+  public static List<Centroid> staticCentroidGenerator (String STATIC_CENTROID_FILE,
+                                                         String DIM,
+                                                         Configuration conf)
+                                                         throws IOException
+  {
+    final int dimension = Integer.parseInt(DIM);
+    final List<Centroid> staticCentroidsList = new ArrayList<>();
+
+    Path path = new Path(STATIC_CENTROID_FILE);
+    FileSystem hdfs = FileSystem.get(conf);
+
+    int ID = 0;
+    String line;
+
+    try (BufferedReader reader = new
+            BufferedReader(new InputStreamReader(hdfs.open(path))))
+    {
+      while(((line = reader.readLine()) != null))
+      {
+        Centroid c = new Centroid(line, dimension, ID);
+        staticCentroidsList.add(c);
+        ID++;
+      }
+    }
+
+    return staticCentroidsList;
   }
 }
