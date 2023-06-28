@@ -5,7 +5,7 @@ Cloud Computing Project
 
 ## Description
 
-![Image of Description](./case_study_description.png)
+![Image of Description](case_study_description.png)
 
 
 ## Quick Start
