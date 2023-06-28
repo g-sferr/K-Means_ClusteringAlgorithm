@@ -260,7 +260,7 @@ public class Kmeans
             "\t\t\tThreshold: " + Config.THRESHOLD,
             "\t\t\tMax_Iterations: " + Config.MAX_ITER,
             "\t\t===============================",
-            "\n1)  Total Execution Time: " + minutes + " min " + seconds + " sec",
+            "\n1)  Total Execution Time: " + minutes + " min " + seconds + " sec" + " ("+((end - start)/1000)+" s)",
             "2)  Total Iterations: " + iterations,
             "3)  Number of Converged Centroids: " + convergedCentroids + "\n"
     };
@@ -270,7 +270,7 @@ public class Kmeans
 
     // print final information
     System.out.println("\n=======================");
-    System.out.println("::TOTAL EXECUTION TIME:: " + minutes + " min " + seconds + " sec" + " ("+((end - start)/1000)+" s)");
+    System.out.println("::TOTAL EXECUTION TIME:: " + minutes + " min " + seconds + " sec");
     System.out.println("=======================");
     System.out.println("\n::FINAL CENTROIDS::");
     System.out.println("\n" + newCentroids);
