@@ -33,12 +33,6 @@ More deteails and final results are presents in the [Final Report Documentation]
 sudo su -- hadoop
 ```
 
-#### Login as hadoop user and go out of the root with "cd" command line after execute below command
-
-```shell
-sudo su -- hadoop
-```
-
 #### From the name node start the name node, data nodes and secondary name node with following command
 
 ```shell
