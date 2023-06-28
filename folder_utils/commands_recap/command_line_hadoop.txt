@@ -7,6 +7,7 @@
 
 mvn clean package
 
+
 - run K-Means on hadoop -
 
 hadoop jar target/KMeans-1.0-SNAPSHOT.jar it.unipi.dii.cc.hadoop.Kmeans <input_file_name> <output_folder_name> 
