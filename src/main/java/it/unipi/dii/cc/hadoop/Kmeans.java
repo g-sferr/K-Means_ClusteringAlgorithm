@@ -252,13 +252,13 @@ public class Kmeans
 
     // Write final information into info_results.txt
     String[] infos = {
-            "\n <<< With respect to the following parameter configuration >>>",
-            " ===============================",
-            "\tCluster (K): " + Config.K,
-            "\tDimension: " + Config.DIMENSIONS,
-            "\tThreshold: " + Config.THRESHOLD,
-            "\tMax_Iterations: " + Config.MAX_ITER,
-            " ===============================",
+            "\n  <<< With respect to the following parameter configuration >>>",
+            "\t\t===============================",
+            "\t\t\tCluster (K): " + Config.K,
+            "\t\t\tDimension: " + Config.DIMENSIONS,
+            "\t\t\tThreshold: " + Config.THRESHOLD,
+            "\t\t\tMax_Iterations: " + Config.MAX_ITER,
+            "\t\t===============================",
             "\n1)  Total Execution Time: " + minutes + " min " + seconds + " sec",
             "2)  Total Iterations: " + iterations,
             "3)  Number of Converged Centroids: " + convergedCentroids + "\n"
