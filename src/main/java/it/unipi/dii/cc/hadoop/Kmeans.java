@@ -168,7 +168,7 @@ public class Kmeans
       fs.delete(output, true);
     }
 
-    // Writes initial centroids into a file
+    // Writes initial centroids into a file .txt
     writeCentroids(conf, newCentroids, OUTPUT_FILE+"/1_initial_rand_centroids.txt");
 
     System.out.println("\n\n\n===============================================");
@@ -242,7 +242,7 @@ public class Kmeans
               Integer.parseInt(Config.MAX_ITER), iterations);
 
     }
-    // Write final centroids into final_Centroids.txt
+    // Write final centroids into file .txt
     writeCentroids(conf, newCentroids, OUTPUT_FILE+"/2_final_centroids.txt");
 
     long end = System.currentTimeMillis();
@@ -263,6 +263,8 @@ public class Kmeans
             "2)  Total Iterations: " + iterations,
             "3)  Number of Converged Centroids: " + convergedCentroids + "\n"
     };
+
+    // Write final general and performance information into file .txt
     writeInfo(conf, infos, OUTPUT_FILE+"/3_info_results.txt");
 
     // print final information
