@@ -144,6 +144,8 @@ public class Kmeans
     System.out.println("=======================");
     System.out.println(" args[1]: <output_folder> = " + otherArgs[1]);
     System.out.println("=======================");
+    //System.out.println(" args[2]: <N°_of_reducer> = " + otherArgs[2]);
+    //System.out.println("=======================");
     System.out.println(" K: " + Config.K);
     System.out.println("=======================");
     System.out.println(" Dimension: " + Config.DIMENSIONS);
@@ -217,6 +219,8 @@ public class Kmeans
 
       int K = Integer.parseInt(Config.K); // k parameter from configuration file
       job.setNumReduceTasks(K); // set the number of reducer to k
+      //int reducerNumber = Integer.parseInt(otherArgs[2]);
+      //job.setNumReduceTasks(reducerNumber); // set the number of reducer to parameter passed as input
 
       // define reducer's output key-value
       job.setOutputKeyClass(IntWritable.class);
