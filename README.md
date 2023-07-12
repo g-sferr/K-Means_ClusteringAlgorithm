@@ -74,10 +74,10 @@ cd /KMeans
 mvn clean package
 ```
 
-#### Hadoop runable - java code Kmeans [input_file-Dataset_name] [output_folder_name]
+#### Hadoop runable - java code Kmeans [input_file-Dataset_name] [output_folder_name] [number_of_reducers]
 
 ```shell
-hadoop jar target/KMeans-1.0-SNAPSHOT.jar it.unipi.dii.cc.hadoop.Kmeans points_set_1k.txt output_kmeans_1k
+hadoop jar target/KMeans-1.0-SNAPSHOT.jar it.unipi.dii.cc.hadoop.Kmeans points_set_1k.txt output_kmeans_1k 3
 ```
 
 ## Authors
