@@ -130,10 +130,10 @@ public class Kmeans
 
     List<Centroid> newCentroids;
 
-    if (otherArgs.length < 2)
+    if (otherArgs.length < 3)
     {
       System.out.println("=======================");
-      System.err.println("Usage: kmeans <input_file_name> <output_folder_name>");
+      System.err.println("Usage: Kmeans <input_file_name> <output_folder_name> <n°_reducers>");
       System.out.println("=======================");
       System.exit(2);
     }
@@ -144,14 +144,16 @@ public class Kmeans
     System.out.println("=======================");
     System.out.println(" args[1]: <output_folder> = " + otherArgs[1]);
     System.out.println("=======================");
-    //System.out.println(" args[2]: <N°_of_reducer> = " + otherArgs[2]);
-    //System.out.println("=======================");
+    System.out.println(" args[2]: <N°_of_reducers> = " + otherArgs[2]);
+    System.out.println("=======================");
     System.out.println(" K: " + Config.K);
     System.out.println("=======================");
     System.out.println(" Dimension: " + Config.DIMENSIONS);
     System.out.println("=======================");
     System.out.println(" Threshold: " + Config.THRESHOLD);
     System.out.println("=======================\n\n");
+
+    int reducerNumber = Integer.parseInt(otherArgs[2]);
 
     long start = System.currentTimeMillis();
     String OUTPUT_FILE = otherArgs[1];
@@ -218,9 +220,7 @@ public class Kmeans
       job.setReducerClass(KMeansReducer.class);
 
       int K = Integer.parseInt(Config.K); // k parameter from configuration file
-      job.setNumReduceTasks(K); // set the number of reducer to k
-      //int reducerNumber = Integer.parseInt(otherArgs[2]);
-      //job.setNumReduceTasks(reducerNumber); // set the number of reducer to parameter passed as input
+      job.setNumReduceTasks(reducerNumber); // set the number of reducer to parameter passed as input
 
       // define reducer's output key-value
       job.setOutputKeyClass(IntWritable.class);
@@ -263,6 +263,7 @@ public class Kmeans
             "\t\t\tDimension: " + Config.DIMENSIONS,
             "\t\t\tThreshold: " + Config.THRESHOLD,
             "\t\t\tMax_Iterations: " + Config.MAX_ITER,
+            "\t\t\tNumber Of Reducers: " + reducerNumber,
             "\t\t===============================",
             "\n1)  Total Execution Time: " + minutes + " min " + seconds + " sec" + " ( "+((end - start)/1000)+" s )",
             "2)  Total Iterations: " + iterations,
