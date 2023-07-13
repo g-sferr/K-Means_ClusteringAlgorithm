@@ -3,7 +3,7 @@
 
 Run by terminal or by IDE 
 
-#### By Terminal
+### By Terminal
 
 ```shell
 python generate_dataset.py
@@ -12,7 +12,7 @@ python generate_dataset.py
 So pass the value of <n> <d> <k>
 ```
 
-#### By IDE, e.g. PyCharm
+### By IDE, e.g. PyCharm
 
 Set ad hoc configuration to run correctly.
 
