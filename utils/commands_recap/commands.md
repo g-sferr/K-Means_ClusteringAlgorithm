@@ -1,7 +1,7 @@
 
 ## Short Command Recap
 
-Remeber to roperly set the "config.properties" file before launch the application.
+Remeber to properly set the "config.properties" file before launch the application.
 
 #### compile command on hadoop
 
