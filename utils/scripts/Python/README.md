@@ -19,7 +19,7 @@ Set ad hoc configuration to run correctly.
 
 1. Apri la cartella tramite PyCharm e recati in alto a destr in "Add Configuration";
 
-![Step_1](../utils/images/usage/1.png)
+![Step_1](/utils/images/usage/1.png)
 
 2. Nella schermata che si apre cliccare nel simbolo "+" in alto a sinistra;
 
