@@ -5,7 +5,7 @@ Cloud Computing Project - University of Pisa
 
 ## Case Study Description
 
-![Image of Description](folder_utils/images/case_study_description.png)
+![Image of Description](utils/images/case_study_description.png)
 
 ## What we are required to do
 
@@ -23,7 +23,7 @@ Cloud Computing Project - University of Pisa
 
 ### Documentation Report
 
-More details and final results are presents in the [Project Report](folder_utils/doc/Project_Report.txt)
+More details and final results are presents in the [Project Report](utils/doc/Project_Report.txt)
 
 ## Quick Start
 
