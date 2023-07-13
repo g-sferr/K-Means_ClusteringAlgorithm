@@ -1,5 +1,5 @@
 
-## Why is "_Cn" present in the dataset file name? <n=1...4>
+## Why is "_Cn" present in the dataset filename? <n=1...4>
 
 Each dataset in the relative folder was created ad hoc for the test case it was decided to conduct, "C" stands for "Case" and the number indicates the specific configuration for that test. For more details on the configurations associated with the various case studies refer to the [Project Report](utils/doc/Project_Report.txt); "Experimental Results" section.
 
