@@ -221,8 +221,8 @@ public class Kmeans
       job.setCombinerClass(KMeansReducer.class);
       job.setReducerClass(KMeansReducer.class);
 
-      int K = Integer.parseInt(Config.K); // k parameter from configuration file
-      job.setNumReduceTasks(reducerNumber); // set the number of reducer to parameter passed as input
+      // set the number of reducer to parameter passed as input
+      job.setNumReduceTasks(reducerNumber);
 
       // define reducer's output key-value
       job.setOutputKeyClass(IntWritable.class);
@@ -245,6 +245,7 @@ public class Kmeans
       // retrieve new Centers from the previous iteration result file
       newCentroids = retrieveResults(iterationOutputPath, conf);
 
+      int K = Integer.parseInt(Config.K);
       stop = checkConditions(newCentroids, oldCentroids, K,
               Double.parseDouble(Config.THRESHOLD),
               Integer.parseInt(Config.MAX_ITER), iterations);
