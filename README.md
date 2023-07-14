@@ -23,7 +23,7 @@ Cloud Computing Project - University of Pisa
 
 ### Documentation Report
 
-More details and final results are presents in the [Project Report](utils/doc/Project_Report.pdf)
+More details and final results are presents in the [Project Report](/utils/doc/Project_Report.pdf)
 
 ## Quick Start
 
