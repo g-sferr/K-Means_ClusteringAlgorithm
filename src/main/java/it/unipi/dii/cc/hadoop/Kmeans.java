@@ -150,6 +150,8 @@ public class Kmeans
     System.out.println("=======================");
     System.out.println(" Dimension: " + Config.DIMENSIONS);
     System.out.println("=======================");
+    System.out.println(" Max_Iterations: " + Config.MAX_ITER);
+    System.out.println("=======================");
     System.out.println(" Threshold: " + Config.THRESHOLD);
     System.out.println("=======================\n\n");
 
