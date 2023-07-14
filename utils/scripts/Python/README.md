@@ -6,10 +6,7 @@ It is possibile to run by terminal or by IDE .
 ### By Terminal follow below approach
 
 ```shell
-python generate_dataset.py
-```
-```
-So pass the value of <n> <d> <k>
+python generate_dataset.py <n> <d> <k>
 ```
 
 ### By IDE, e.g. PyCharm follow instead below approach
