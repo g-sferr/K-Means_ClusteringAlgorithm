@@ -213,6 +213,7 @@ public class Kmeans
       Job job = Job.getInstance(conf, "Kmeans Job " + (iterations));
       job.setJarByClass(Kmeans.class);
 
+      //This Below are not necessary. The format is always Text, not needed to specify it
       job.setInputFormatClass(TextInputFormat.class);
       job.setOutputFormatClass(TextOutputFormat.class);
 
