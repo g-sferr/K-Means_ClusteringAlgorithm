@@ -221,6 +221,26 @@ public class Kmeans
       job.setCombinerClass(KMeansReducer.class);
       job.setReducerClass(KMeansReducer.class);
 
+      // *************************************************
+      // ******* Pay attention to the following Note *****
+      // *************************************************
+      /*
+      - Important:To maintain this type of combiner usage,
+      by passing in job.setCombinerClass() the reducer directly,
+      a correction must be made to the value of the partial sums
+      for a more accurate result than the current one without this
+      consideration. The app Works correctly, but is better to apply
+      this update to the Source Code. One needs to add an attribute
+      in the Point class that allows to keep track of the numElements
+      in the various partial sums to eventually perform a weighted sum of these
+      partial sums to obtain the precise and correct value of the centroid.
+
+      - Otherwise define this behavior in a specific class "Combiner"
+      and adapt it to the project implementation in such a way as to get
+      the correct result and then pass this class into job.setCombinerClass()
+      here in the main() and reorganize the KMeansReducer class behavior accordingly.
+       */
+
       // set the number of reducer to parameter passed as input
       job.setNumReduceTasks(reducerNumber);
 
